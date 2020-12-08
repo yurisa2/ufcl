@@ -9,8 +9,8 @@ data = data['appl']
 
 xrows = len(data)
 xcols = 1
-centers = 3
-ncenters = 3
+centers = 2
+ncenters = 2
 weights = range(1, xrows)
 m = 2
 dist = 2
@@ -20,6 +20,13 @@ rate_par = 0.3
 u = xrows * ncenters
 ermin = 1
 iter = 1
+
+weights = 1
+weights = ufcl.np.asarray(weights)
+
+
+weights = ufcl.np.repeat(weights, xrows)
+
 
 
 ufcl.cmeans(data,
@@ -36,6 +43,22 @@ ufcl.cmeans(data,
             u,
             ermin,
             iter)
+
+ufcl.u
+ufcl.print_d()
+
+
+
+# d = {345: 'value'}
+# print(d)
+# # {'key': 'value'}
+# d[3345] = 'mynewvalue'
+# print(d)
+# # {'key': 'value', 'mynewkey': 'mynewvalue'}
+#
+# d = dict()
+
+
 #
 # import numpy as np
 # test = np.array
