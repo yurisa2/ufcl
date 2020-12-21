@@ -10,8 +10,6 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-import matplotlib.pylab as plt
-
 %pylab inline
 
 
@@ -19,10 +17,21 @@ import matplotlib.pylab as plt
 data = pd.read_csv('data/data.csv')
 data = data['appl']
 
+data['appl'][28]
 
 # fs = CMeans.CMeansPartitioner(data=data,npart=3, max_iter=10)
 
 
 
 
-sort(CMeans.c_means(3, data, 3, max_iter=1000, patience=100))
+sort(CMeans.c_means(7, data, 1, max_iter=1000, patience=100))
+
+from sklearn.cluster import KMeans
+
+datak = data.array
+
+datak = np.array(datak)
+datak = datak.reshape(-1, 1)
+
+kmeans = KMeans(n_clusters=7, random_state=0).fit(datak)
+np.sort(kmeans.cluster_centers_)

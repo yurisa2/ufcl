@@ -37,7 +37,7 @@ ufcl.cmeans(data,
             weights,
             m,
             dist - 1,
-            100, #itermax
+            5, #itermax
             reltol,
             verbose,
             u,
@@ -51,7 +51,7 @@ ufcl.print_d()
 
 # d = {345: 'value'}
 # print(d)
-# # {'key': 'value'}
+# # {'key': 'value'}https://pt.pornhub.com/view_video.php?viewkey=ph5fcbf46bb1e1d
 # d[3345] = 'mynewvalue'
 # print(d)
 # # {'key': 'value', 'mynewkey': 'mynewvalue'}
