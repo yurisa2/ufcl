@@ -263,12 +263,13 @@ data = df['appl'].values
 
 centros = [0, 200, 1500, 2000, 3000, 3500,4000]
 
-minimo = min(data)
+minimo = 0.0000000000000000000000000001
 maximo = max(data)
 
 varbound=np.array([[minimo,maximo]]*7)
 
 def runModel(centros):
+    centros = list(centros)
     fs = Custom.CustomPartitioner(centros,data=data )
     model = chen.ConventionalFTS(partitioner=fs)
     model.fit(data)
