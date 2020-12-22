@@ -9,5 +9,4 @@ def f(X):
 varbound=np.array([[0,10]]*7)
 
 model=ga(function=f,dimension=7,variable_type='real',variable_boundaries=varbound)
-
 model.run()
