@@ -10,21 +10,18 @@ Original file is located at
 # -*- coding: utf-8 -*-
 import sys
 
-# sys.path.insert(0,'/content/drive/MyDrive/GA/ufcl')
-
 if sys.version_info[0] < 3:
     from StringIO import StringIO
 else:
     from io import StringIO
 
 import pandas as pd
-from pyFTS.partitioners import Custom
+from pyFTS.partitioners import Custom, FCM, CMeans
 from pyFTS.common import Membership as mf
 from pyFTS.common import FLR
 from pyFTS.models import chen, cheng, ismailefendi, sadaei, hofts, hwang
 from pyFTS.common import Util
 from sklearn.metrics import mean_squared_error
-
 
 import itertools
 import datetime
@@ -268,42 +265,13 @@ df
 
 data = df['appl'].values
 
-def runModel(centros):
-    centros = list(centros)
-    fs = Custom.CustomPartitioner(centros,data=data )
-    model = chen.ConventionalFTS(partitioner=fs)
-    model.fit(data)
-    forecasts = model.predict(data)
-    y_true = data
-    y_pred = forecasts
-    error_mse = 0
+# fs = FCM.FCMPartitioner(data=data )
+fs = CMeans.CMeansPartitioner(data=data, npart=7 )
+model = chen.ConventionalFTS(partitioner=fs)
+model.fit(data)
+forecasts = model.predict(data)
+y_true = data
+y_pred = forecasts
+error_mse = 0
 
-    try:
-        error_mse = mean_squared_error(y_true, y_pred)
-    except:
-        error_mse = Null
-
-    return error_mse
-
-centros = [1000, 1300, 1500, 2000, 3000, 3500,4000]
-
-minimo = 0.0000000000000000000000000001
-maximo = max(data)
-
-
-varbound=np.array([[minimo,maximo]]*7)
-
-varbound=np.array([[minimo, 300],
-                    [300, 1000],
-                    [1000, 2000],
-                    [2000, 3000],
-                    [2000, 3000],
-                    [3000, 5000],
-                    [4000, maximo]])
-
-varbound
-
-model=ga(function=runModel,dimension=7,variable_type='int',variable_boundaries=varbound)
-
-
-model.run(set_function= ga.set_function_multiprocess(runModel, n_jobs = -1))
+error_mse = mean_squared_error(y_true, y_pred)

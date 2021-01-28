@@ -3,7 +3,7 @@
 # Zero-inflated fuzzy time series
 #
 # FCM (Li, Cheng and Lin, 2008) for intervals
-# Backtracking (Li and Chen, 2007)
+# Backtracking (Li and Chen, 2007)Q
 # How to apply FTS to zero-inflated time series
 # Application: inventory management, raw material prediction, manufacturing management
 #
@@ -23,8 +23,8 @@ ORDEM <- 15    #High-order FTS. Maximum of 9th order
 k0 <- 7  #Number of intervals
 LINGUISTIC.TERMS <- 7 ## Numero de termos linguisticos
 ##tem que ser igual a numero de intervalos???
-REPETITIONS <- 1   ##Monte Carlo simulation repetitions
-fcm.method <- "cmeans" #"ufcl"  #or "cmeans"
+# REPETITIONS <- 3   ##Monte Carlo simulation repetitions
+fcm.method <- "ufcl" #"ufcl"  #or "cmeans"
 
 errorcols <- NULL
 
@@ -35,20 +35,28 @@ dados <- read.csv("data/contral.csv", header=TRUE)
 
 
 ### 20210125 - Inicialização única para todas as rodadas
-# centers <- c(0, sample(min(dados$appl[dados$appl!=0]):max(dados$appl),k0-1))
-# centers <- as.matrix(centers)
+centers <- c(0, sample(min(dados$appl[dados$appl!=0]):max(dados$appl),k0-1))
+centers <- as.matrix(centers)
 
 
 tic <- proc.time()
 forecasting <- NULL
-mcs<-1
-for(mcs in 1:REPETITIONS){
-  print(paste("Monte Carlo Simulation #",mcs,sep=""))
+
+fts <- function(centers, ORDEM, k0, LINGUISTIC.TERMS, fcm.method, dados)
+{
+  # print(paste("Monte Carlo Simulation #",mcs,sep=""))
+
+  # print(centers)
+  # print(ORDEM)
+  # print(k0)
+  # print(LINGUISTIC.TERMS)
+  # print(fcm.method)
+  # print(dados)
 
 
   ### 20210125 Inicialização dos centros a cada rodada (iteração)
-  centers <- c(0, sample(min(dados$appl[dados$appl!=0]):max(dados$appl),k0-1))
-  centers <- as.matrix(centers)
+  # centers <- c(0, sample(min(dados$appl[dados$appl!=0]):max(dados$appl),k0-1))
+  # centers <- as.matrix(centers)
 
   ### Step 1 - FCM ###
   al.cl <- cmeans(dados$appl,k0, centers=centers, method=fcm.method)
@@ -68,7 +76,7 @@ for(mcs in 1:REPETITIONS){
   u<-min(U)
   al.cl$center
   for(i in 1:(k0-1)) u <- c(u, mean(al.cl$center[i:(i+1)]))
-  u
+  # u
 
 
   ### Step 2 - Linguistic Terms ###
@@ -92,7 +100,7 @@ for(mcs in 1:REPETITIONS){
   #mu <- round(al.cl$membership,3)
   mu <- al.cl$membership
   rownames(mu) <- dados$year
-  mu
+  # mu
 
 
   # Identifica todas as precedências
@@ -119,8 +127,8 @@ for(mcs in 1:REPETITIONS){
     assign(paste("prec",n,sep=""),aux)
     prec[[n]] <- aux
   }
-  prec
-  fts
+  # prec
+  # fts
   paste("A",fts,sep="")
   #####
 
@@ -153,7 +161,7 @@ for(mcs in 1:REPETITIONS){
 
   }
   #group
-  frg
+  # frg
   #####
 
 
@@ -304,8 +312,8 @@ for(mcs in 1:REPETITIONS){
         subFTS <- subFTS[-1]
       }
     }
-    S
-    S.index
+    print(S)
+    print(S.index)
 
     #Defuzzifica resposta
     if(!is.na(S)){
@@ -338,51 +346,15 @@ for(mcs in 1:REPETITIONS){
       names(yhat)[length(yhat)] <- year
     }
   }
-  yhat
+  print(yhat)
 
-  forecasting <- cbind(forecasting, yhat)
+  # forecasting <- cbind(forecasting, yhat)
 
 
-  ### 20210125 Calcula o erro de cada rodada/coluna/inicialização
-  ### 20210125 Adiciona à lista errorcols
-  errorcols <- rbind(errorcols, round(MSE(dados$appl,yhat),0))
+  error <- round(MSE(dados$appl,yhat),0)
 
-  print(proc.time()-tic)
+  return(error)
+
 } # END of REPETITIONS
-(tac <- proc.time()-tic)
 
-
-### 20210125 Menor erro calculado de cada um dos 30 modelos
-### 20210125  - MSE MINIMO DOS 30 MODELOS 4117521 (!!!)
-min(errorcols)
-
-# FCM fdsOUT
-# user  system elapsed
-#75.77    0.31   77.55
-
-# UFCL fdsOUT
-# user  system elapsed
-#74.51    0.28   76.04
-forecasting
-
-forecasting.median <- apply(forecasting, 1, median)
-
-
-
-#Metricas
-o <- dados$appl[-1]
-d <- forecasting.median[-length(forecasting.median)]  #Remover "[]" se não prever futuro
-mape <- round(MAPE(o, d),2)
-(mape.text <- paste(mape,"%",sep=""))
-(rmse <- round(RMSE(o, d),1))
-sum(SE(o,d))
-(mse <- round(MSE(o,d),0))
-
-
-error <- o - d
-mean(error^2)
-Uacc(o,d)
-Uqual(o,d)
-
-
-  ### END ###
+fts(centers, ORDEM, k0, LINGUISTIC.TERMS, fcm.method, dados)
