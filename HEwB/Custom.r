@@ -23,10 +23,11 @@ ORDEM <- 15    #High-order FTS. Maximum of 9th order
 k0 <- 7  #Number of intervals
 LINGUISTIC.TERMS <- 7 ## Numero de termos linguisticos
 ##tem que ser igual a numero de intervalos???
-REPETITIONS <- 1   ##Monte Carlo simulation repetitions
-fcm.method <- "cmeans" #"ufcl"  #or "cmeans"
+REPETITIONS <- 30   ##Monte Carlo simulation repetitions
+fcm.method <- "ufcl" #"ufcl"  #or "cmeans"
 
 errorcols <- NULL
+custerCenters <- NULL
 
 setwd(PATH)
 source("HEwB/funcoes.r")
@@ -342,19 +343,21 @@ for(mcs in 1:REPETITIONS){
 
   forecasting <- cbind(forecasting, yhat)
 
-
   ### 20210125 Calcula o erro de cada rodada/coluna/inicialização
   ### 20210125 Adiciona à lista errorcols
-  errorcols <- rbind(errorcols, round(MSE(dados$appl,yhat),0))
+  errorcols <- cbind(errorcols, round(MSE(head(dados$appl, -1),head(yhat, -1)),0))
+  custerCenters <- cbind(custerCenters, sort(centers))
 
   print(proc.time()-tic)
 } # END of REPETITIONS
 (tac <- proc.time()-tic)
 
+aggregate <- rbind(errorcols, custerCenters, forecasting)
 
 ### 20210125 Menor erro calculado de cada um dos 30 modelos
 ### 20210125  - MSE MINIMO DOS 30 MODELOS 4117521 (!!!)
 min(errorcols)
+write.csv(aggregate, "data/exports/agg.csv")
 
 # FCM fdsOUT
 # user  system elapsed
