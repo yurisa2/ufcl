@@ -74,20 +74,20 @@ for(mcs in 1:REPETITIONS){
 
   lingTermsPrec <- function(order, builtFTS) {
     prec <- vector("list",order)
-    for(n in 1:order) assign(paste("prec",n,sep=""), c(0,builtFTS[1:n]), pos=1)     #Iniciando variaveis com NULL, prec1, prec2, prec3...
+    for(n in 1:order) assign(paste("prec",n,sep=""), c(0,builtFTS[1:n]), envir = .GlobalEnv)     #Iniciando variaveis com NULL, prec1, prec2, prec3...
 
     for(i in 2:length(builtFTS)){
       prec1 <- rbind(prec1, c(builtFTS[(i-1):i+1]))   #Acrescenta NA
       for(k in 2:min(i,order)){
-        assign(paste("prec",k,sep=""), rbind(get(paste("prec",k,sep=""), pos=1), builtFTS[(i-k+1):(i+1)]) , pos=1)
+        assign(paste("prec",k,sep=""), rbind(get(paste("prec",k,sep=""), envir = .GlobalEnv), builtFTS[(i-k+1):(i+1)]) , envir = .GlobalEnv)
       }
     }
 
     for(n in 1:length(prec)){
-      aux <- get(paste("prec",n,sep=""), pos=1)
+      aux <- get(paste("prec",n,sep=""), envir = .GlobalEnv)
       aux <- unique(aux)
-      aux <- aux[order(aux[,1],aux[,2]),]
-      assign(paste("prec",n,sep=""),aux, pos=1)
+      aux <- aux[order(aux[,1],aux[,2]),].GlobalEnv
+      assign(paste("prec",n,sep=""),aux, envir = .GlobalEnv)
       prec[[n]] <- aux
     }
 
