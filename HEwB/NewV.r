@@ -17,13 +17,13 @@ library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/Documents/UFCL"
+PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
 #ORDEM n+1 para calcularmos até ordem n
 ORDEM <- 15    #High-order FTS. Maximum of 9th order
 k0 <- 7  #Number of intervals
 LINGUISTIC.TERMS <- 7 ## Numero de termos linguisticos
 ##tem que ser igual a numero de intervalos???
-REPETITIONS <- 3   ##Monte Carlo simulation repetitions
+REPETITIONS <- 30   ##Monte Carlo simulation repetitions
 fcmMethod <- "ufcl" #"ufcl"  #or "cmeans"
 
 errorcols <- NULL
@@ -101,18 +101,6 @@ for(mcs in 1:REPETITIONS){
   #rs :: vetor com tamanhos das respostas
   #w :: tamanho máximo de uma subsequência de uma certain transition
   #
-  defuz1w <- function(P) {
-    rs <- NULL
-    w <- 0
-    for(i in 1:length(P)){
-      rs <- c(rs, length(P[[i]])-1)
-      w <- max(w, length(P[[i]])-1)
-    }
-    # #tamanho da fts
-    # q <- length(fts)
-
-    return(rs)
-  }
 
   rs <- defuz1w(P)
 
@@ -126,7 +114,7 @@ for(mcs in 1:REPETITIONS){
 
   ### 20210125 Calcula o erro de cada rodada/coluna/inicialização
   ### 20210125 Adiciona à lista errorcols
-  errorcols <- cbind(errorcols, round(MSE(head(dataPoints, -1),predictions),0))
+  errorcols <- cbind(errorcols, round(MSE(head(dataPoints, -2),head(predictions, -1)),0))
   custerCenters <- cbind(custerCenters, sort(centers))
 
 
@@ -140,7 +128,7 @@ aggregate <- rbind(errorcols, custerCenters, forecasting)
 ### 20210125 Menor erro calculado de cada um dos 30 modelos
 ### 20210125  - MSE MINIMO DOS 30 MODELOS 4117521 (!!!)
 min(errorcols)
-write.csv(aggregate, "data/exports/agg.csv")
+# write.csv(aggregate, "data/exports/agg.csv")
 
 # FCM fdsOUT
 # user  system elapsed
@@ -153,6 +141,11 @@ forecasting
 
 forecasting.median <- apply(forecasting, 1, median)
 
+length(forecasting.median)
+
+length(dataPoints)
+
+MSE(head(dataPoints, -2),head(forecasting.median, -1)) # HERE ARE THE CHIST
 
 
 #Metricas

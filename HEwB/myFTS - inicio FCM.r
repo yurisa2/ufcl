@@ -18,7 +18,7 @@ library(e1071)
 set.seed(1)
 
 SEM.FINAL.DE.SEMANA <- TRUE
-PATH <- "/home/yurisa2/Documents/UFCL"
+PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
 #ORDEM n+1 para calcularmos até ordem n
 ORDEM <- 15    #High-order FTS. Maximum of 9th order
 MISSING.FIRST <- 1    #1 if may start sequence with NA (tables 3-6 from paper). 0 otherwise

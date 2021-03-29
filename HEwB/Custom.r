@@ -17,7 +17,7 @@ library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/Documents/UFCL"
+PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
 #ORDEM n+1 para calcularmos até ordem n
 ORDEM <- 15    #High-order FTS. Maximum of 9th order
 k0 <- 7  #Number of intervals
