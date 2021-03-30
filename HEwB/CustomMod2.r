@@ -5,7 +5,7 @@ library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/Documents/UFCL"
+PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
 #ORDEM n+1 para calcularmos até ordem n
 ORDEM <- 15    #High-order FTS. Maximum of 9th order
 k0 <- 7  #Number of intervals
@@ -22,6 +22,8 @@ source("HEwB/include.r")
 
 dados <- read.csv("data/contral.csv", header=TRUE)
 dataPoints <- dados$appl
+
+dataPoints <- head(dataPoints, 50)
 
 ### 20210125 - Inicialização única para todas as rodadas
 # centers <- c(0, sample(min(dataPoints[dataPoints!=0]):max(dataPoints),k0-1))
@@ -49,7 +51,7 @@ for(mcs in 1:REPETITIONS){
   yhat <- prediction(dataPoints, fts, A2, U, P, rs)
   forecasting <- cbind(forecasting, yhat)
 
-  errorcols <- cbind(errorcols, round(MSE(head(dados$appl, -1),head(yhat, -1)),0))
+  errorcols <- cbind(errorcols, round(MSE(head(dataPoints, -1),head(yhat, -1)),0))
   custerCenters <- cbind(custerCenters, sort(centers))
 
 } # END of REPETITIONS
@@ -57,7 +59,7 @@ for(mcs in 1:REPETITIONS){
 forecasting.median <- apply(forecasting, 1, median)
 
 #Metricas
-o <- dados$appl[-1]
+o <- dataPoints[-1]
 d <- forecasting.median[-length(forecasting.median)]  #Remover "[]" se não prever futuro
 
 mse <- round(MSE(o,d),0)

@@ -17,23 +17,23 @@ xis <- function(x){
 
 #Defuzzification method, Song and Chissom (1993) - Part 1
 #k = ordem da previsao
-defuzzifyLC2007P1 <- function(x, intervals=u, k=1){
-  index <- which(x==max(x))
-  if((max(index)-min(index))==(length(index)-1)){   #Case (1 and 2)
-    values <- c(intervals[index],intervals[max(index)+1])
-    if(is.na(values[length(values)])){
-      values[length(values)] <- max(U)
-    }
-    yhat <- mean(values)
-  } else {    #Case (3)
-    allIntervals <- c(u,max(U))
-    midpoint <- NULL
-    for(i in 1:(length(allIntervals)-1)) midpoint <- c(midpoint, mean(allIntervals[i:(i+1)]))
-    std <- x/sum(x)
-    yhat <- sum(midpoint * std)
-  }
-  return(yhat)
-}
+# defuzzifyLC2007P1 <- function(x, intervals=u, k=1){
+#   index <- which(x==max(x))
+#   if((max(index)-min(index))==(length(index)-1)){   #Case (1 and 2)
+#     values <- c(intervals[index],intervals[max(index)+1])
+#     if(is.na(values[length(values)])){
+#       values[length(values)] <- max(U)
+#     }
+#     yhat <- mean(values)
+#   } else {    #Case (3)
+#     allIntervals <- c(u,max(U))
+#     midpoint <- NULL
+#     for(i in 1:(length(allIntervals)-1)) midpoint <- c(midpoint, mean(allIntervals[i:(i+1)]))
+#     std <- x/sum(x)
+#     yhat <- sum(midpoint * std)
+#   }
+#   return(yhat)
+# }
 
 #Root Mean Square Error
 RMSE <- function(y,yhat){
@@ -108,9 +108,9 @@ clusteringUBuild <- function(data) {
   Dmax <- max(data)
   D1 <- 0 #55
   D2 <- 0   #663  #Para dar um máximo de 7000
-  U <- c(Dmin-D1, Dmax+D2)
+  UValue <- c(Dmin-D1, Dmax+D2)
 
-  return(U)
+  return(UValue)
 }
 
 clusteringPartitionU <- function(UValue, centers, intervals) {
@@ -377,8 +377,8 @@ prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
           subFTS <- subFTS[-1]
         }
       }
-      S
-      S.index
+      # S
+      # S.index
 
       #Defuzzifica resposta
       if(!is.na(S)){
