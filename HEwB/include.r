@@ -103,9 +103,9 @@ Uacc <- function(y, yhat){
 
 
 ##### STEP 1
-clusteringUBuild <- function(dataPoints) {
-  Dmin <- min(dataPoints)
-  Dmax <- max(dataPoints)
+clusteringUBuild <- function(data) {
+  Dmin <- min(data)
+  Dmax <- max(data)
   D1 <- 0 #55
   D2 <- 0   #663  #Para dar um máximo de 7000
   U <- c(Dmin-D1, Dmax+D2)
@@ -113,16 +113,16 @@ clusteringUBuild <- function(dataPoints) {
   return(U)
 }
 
-clusteringPartitionU <- function(U, centers) {
-  u <- min(U)
-  for(i in 1:(k0-1)) u <- c(u, mean(al.cl$center[i:(i+1)]))
+clusteringPartitionU <- function(UValue, centers, intervals) {
+  uValue <- min(UValue)
+  for(i in 1:(intervals-1)) uValue <- c(uValue, mean(centers[i:(i+1)]))
 
-  return(u)
+  return(uValue)
 }
 
-clusteringInitial <- function (dataPoints, k0, centers, method = "ufcl") {
+clusteringInitial <- function (data, intervals, centers, method = "ufcl") {
 
-  initialClustering <- cmeans(dataPoints,k0, centers=centers, method=method)
+  initialClustering <- cmeans(data,intervals, centers=centers, method=method)
   #Ordered fuzzy sets are obtained according to the ascending ordered centers
   initialClustering$membership <- initialClustering$membership[,order(initialClustering$centers)]
   initialClustering$size[order(initialClustering$centers)]
@@ -135,38 +135,32 @@ clusteringInitial <- function (dataPoints, k0, centers, method = "ufcl") {
 #####
 ##### Step 2
 
-lingTermsA2 <- function(LINGUISTIC.TERMS, k0) {
+lingTermsA2 <- function(terms, intervals) {
 
-  A2 <- matrix(0, nrow=LINGUISTIC.TERMS, ncol=k0)
-  for(i in 1:LINGUISTIC.TERMS){
-    A2[i,i] <- 1
+  A2Value <- matrix(0, nrow=terms, ncol=intervals)
+  for(i in 1:terms){
+    A2Value[i,i] <- 1
     if((i-1)>0){
-      A2[i,(i-1)] <- 0.5
+      A2Value[i,(i-1)] <- 0.5
     }
-    if((i+1)<k0){
-      A2[i,(i+1)] <- 0.5
+    if((i+1)<intervals){
+      A2Value[i,(i+1)] <- 0.5
     }
   }
-  rownames(A2) <- paste("A",1:k0,sep="")
-  colnames(A2) <- paste("u",1:k0,sep="")
+  rownames(A2Value) <- paste("A",1:intervals,sep="")
+  colnames(A2Value) <- paste("u",1:intervals,sep="")
 
-  return(A2)
+  return(A2Value)
 }
 
-lingTermsFTS <- function(clusteringInitial) {
-  mu <- al.cl$membership
-  rownames(mu) <- 1:length(dataPoints)
+lingTermsFTS <- function(data, clusteringInitial) {
+  mu <- clusteringInitial$membership
+  rownames(mu) <- 1:length(data)
 
-  fts <- apply(mu, 1, findMax)    #FTS somente com números dos termos linguísticos
+  ftsValue <- apply(mu, 1, findMax)    #FTS somente com números dos termos linguísticos
 
-  return(fts)
+  return(ftsValue)
 }
-
-
-
-#####
-
-
 
 ### Step 3 ###
 #Divide the derived fuzzy logical relationships into groups based on
@@ -203,193 +197,220 @@ fuzzyRelGroups <- function(order, prec) {
 }
 
 
+calcPrec <- function(ftsValue, order) {
+  precVal <- list()
 
-#### Identifying all Certain Transitions ####
+  for(n in 1:order) precVal[[paste("prec",n,sep="")]] <-  c(0,fts[1:n])  # STOPPED HERE
+  for(i in 2:length(fts)){
+    precVal[["prec1"]] <- rbind(precVal[["prec1"]], c(fts[(i-1):i+1]))   #Acrescenta NA
+    for(k in 2:min(i,order)){
+      precVal[[paste("prec",k,sep="")]] <- rbind(precVal[[paste("prec",k,sep="")]]  , fts[(i-k+1):(i+1)])
 
+    }
+  }
+  return(precVal)
+}
 
-idCertainTransitions <- function(prec1, fuzzyRelGroups, aux) {
-
-  #Initializing C
-  C <- as.character(unique(prec1[,2]))  #Quem eu quero prever
-  P <- NULL
-  #C <- "NA"
-  while(length(C)>0){
-    C.length <- length(C)
-    w <- length(P)
-
-    f <- as.numeric(strsplit(C[1]," ")[[1]]) #Primeiro elemento de C, vetor
-    n <- length(f)
-
-    #LOOP
-    while(w==length(P) && (C.length==length(C))) {
-      fuzzyRelGroups[[n]]
-      aux <- get(paste("prec",n,sep=""))
-
-      if(is.na(f[length(f)])){
-        S <- NA
-        #Vetor que indica onde previsto igual NA
-        vetor <- is.na(aux[,ncol(aux)])
-        antecedentes <- aux[vetor,-ncol(aux)]
-        #Vetor que identifica quais(e quantas) ocorrências iguais a antecedentes de NA
-        vetor <- NULL
-        for(linha in 1:nrow(aux)){
-          vetor <- c(vetor, all(aux[linha,-ncol(aux)]==antecedentes))
-        }
-        origem <- aux[vetor,-ncol(aux)]
-        #aux[aux[,1]==aux[vetor,1],1]
-        destino <- aux[vetor,ncol(aux)]
-        if(length(unique(destino))>1){
-          C <- C[-1]
-          C <- c(paste(paste(unique(origem),collapse=" "),S),C)
-          w <- Inf   #Sai do inner WHILE
-          next()
-        } else {
-          S <- as.character(S)
-          P[[w+1]] <- as.numeric(c(origem, destino))
-          C <- C[-1]
-          #message(paste("****\nP:",paste(P,collapse="/"),"\nC:",paste(C,collapse="/"),"\n****\n"))
-        }
-      } else {
+defPrec <- function(precVal, order) {
+  prec <- vector("list",order)
+  for(n in 1:length(prec)){
+    # n <- 1
+    aux <- precVal[[paste("prec",n,sep="")]]
+    aux <- unique(aux)
+    aux <- aux[order(aux[,1],aux[,2]),]
+    precVal[[paste("prec",n,sep="")]] <- aux
+    prec[[n]] <- aux
+  }
+  return(prec)
+}
 
 
-        #Removendo linha cuja última coluna seja NA
-        if(any(is.na(aux[,ncol(aux)]))){
-          aux <- aux[-which(is.na(aux[,ncol(aux)])),]
-        }
+idCertainTransitions <- function(precVal, frgValue) {
+    #Initializing C
+    C <- as.character(unique(precVal[["prec1"]][,2]))  #Quem eu quero prever
+    # precVal[["prec1"]][,2]
+    PValue <- NULL
+    #C <- "NA"
+    while(length(C)>0){
+      C.length <- length(C)
+      w <- length(PValue)
 
-        #A1 prevê A1 e A2. Logo, uncertain transition
-        #Portanto, A1, deve ir para backtracking
-        #Caso contrário, essa relação unica vai para P
-        vetor <- NULL
-        for(linha in 1:nrow(aux)){
-          vetor <- c(vetor, all(aux[linha,-ncol(aux)]==f))
-        }
+      f <- as.numeric(strsplit(C[1]," ")[[1]]) #PValuerimeiro elemento de C, vetor
+      n <- length(f)
 
-        #Identificando o(s) próximo(s) valor(es)
-        S <- aux[vetor,ncol(aux)]
+      #LOOPValue
+      while(w==length(PValue) && (C.length==length(C))) {
+        frg[[n]]
+        # aux <- get(paste("prec",n,sep=""))
+        aux <- data.frame(precVal[paste("prec",n,sep="")])
 
-        #From Table 6 (Li and Cheng, 2007)
-        if(length(S)==0) {
-          P[[w+1]] <- as.numeric(c(strsplit(C[1], " ")[[1]], NA))
-          C <- C[-1]
-          R <- NULL
-        }
-        if(length(S)==1){
-          S <- as.character(S)
-          P[[w+1]] <- as.numeric(c(strsplit(C[1], " ")[[1]], strsplit(S, " ")[[1]]))
-          C <- C[-1]
-        }
-        if(length(S)>1){
-          C <- C[-1]
-
-          #Backtracking: série de antecedentes
-          nome.var <- paste("prec",n+1,sep="")
-          vars <- get(nome.var)
-          vars <- na.omit(vars)
+        if(is.na(f[length(f)])){
+          S <- NA
+          #Vetor que indica onde previsto igual NA
+          vetor <- is.na(aux[,ncol(aux)])
+          antecedentes <- aux[vetor,-ncol(aux)]
+          #Vetor que identifica quais(e quantas) ocorrências iguais a antecedentes de NA
           vetor <- NULL
-          for(i in 1:nrow(vars)){
-            vetor <- c(vetor, all(vars[i,-c(1,ncol(vars))]==f))
+          for(linha in 1:nrow(aux)){
+            vetor <- c(vetor, all(aux[linha,-ncol(aux)]==antecedentes))
           }
-          vars <- vars[vetor,-ncol(vars)]
-          vars <- unique(vars)
-          R <- NULL
-          for(i in 1:nrow(vars)){
-            R[i] <- paste(vars[i,], collapse=" ")
+          origem <- aux[vetor,-ncol(aux)]
+          #aux[aux[,1]==aux[vetor,1],1]
+          destino <- aux[vetor,ncol(aux)]
+          if(length(unique(destino))>1){
+            C <- C[-1]
+            C <- c(paste(paste(unique(origem),collapse=" "),S),C)
+            w <- Inf   #Sai do inner WHILE
+            next()
+          } else {
+            S <- as.character(S)
+            PValue[[w+1]] <- as.numeric(c(origem, destino))
+            C <- C[-1]
+            #message(paste("****\nPValue:",paste(PValue,collapse="/"),"\nC:",paste(C,collapse="/"),"\n****\n"))
           }
-          C <- c(R, C)
-          if(length(R)==1){
-            w <- Inf
+        } else {
+
+          #Removendo linha cuja última coluna seja NA
+          if(any(is.na(aux[,ncol(aux)]))){
+            aux <- aux[-which(is.na(aux[,ncol(aux)])),]
+          }
+
+          ncol(aux)
+          as.vector(aux)
+          #A1 prevê A1 e A2. Logo, uncertain transition
+          #PValueortanto, A1, deve ir para backtracking
+          #Caso contrário, essa relação unica vai para PValue
+          vetor <- NULL
+          for(linha in 1:nrow(aux)){
+            vetor <- c(vetor, all(aux[linha,-ncol(aux)]==f))
+          }
+
+          #Identificando o(s) próximo(s) valor(es)
+          S <- aux[vetor,ncol(aux)]
+
+          #From Table 6 (Li and Cheng, 2007)
+          if(length(S)==0) {
+            PValue[[w+1]] <- as.numeric(c(strsplit(C[1], " ")[[1]], NA))
+            C <- C[-1]
+            R <- NULL
+          }
+          if(length(S)==1){
+            S <- as.character(S)
+            PValue[[w+1]] <- as.numeric(c(strsplit(C[1], " ")[[1]], strsplit(S, " ")[[1]]))
+            C <- C[-1]
+          }
+          if(length(S)>1){
+            C <- C[-1]
+
+            #Backtracking: série de antecedentes
+            nome.var <- paste("prec",n+1,sep="")
+            vars <-data.frame(precVal[nome.var])
+            vars <- na.omit(vars)
+            vetor <- NULL
+            for(i in 1:nrow(vars)){
+              vetor <- c(vetor, all(vars[i,-c(1,ncol(vars))]==f))
+            }
+            vars <- vars[vetor,-ncol(vars)]
+            vars <- unique(vars)
+            R <- NULL
+            for(i in 1:nrow(vars)){
+              R[i] <- paste(vars[i,], collapse=" ")
+            }
+            C <- c(R, C)
+            if(length(R)==1){
+              w <- Inf
+            }
           }
         }
       }
     }
-  }
-  return(P)
+
+return(PValue)
 }
 
+defuzRle1 <- function(PValue) {
+  #### Li and Cheng (2007) Defuzzifying ####
+  #rs :: vetor com tamanhos das respostas
+  #w :: tamanho máximo de uma subsequência de uma certain transition
 
+  rsValue <- NULL
+  for(i in 1:length(PValue)){
+    rsValue <- c(rsValue, length(PValue[[i]])-1)
+  }
 
-prediction <- function(data, fts, P, rs) {
+  return(rsValue)
+}
 
-  yhat <- NULL
-  #Só pode prever um ano a frente
-  for(year in 2:length(data)+1){
+prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
 
-    fts2 <- c(0, fts)
-    #Se ano a ser previsto está dentro da série observada
-    ultimo.ano <- as.numeric(names(fts))[length(fts)]
-    if(year > ultimo.ano){
-      fts2 <- c(fts2,NA)
-      names(fts2)[length(fts2)] <- year
-    }
-    index <- which(as.numeric(names(fts2))==year)
-    subFTS <- fts2[1:(index-1)]
+    FIRST.ITEM <- 2
+    LAST.ITEM <- length(data)+1
+    # year <- 1993
+    yhatValue <- NULL
+    #Só pode prever um ano a frente
+    for(year in FIRST.ITEM:LAST.ITEM){
 
-    ok <- FALSE
-    while(length(subFTS)>0 && ok==FALSE){
-      Pindex <- which(rs==length(subFTS))
-      S <- NULL
-      S.index <- NULL
-      for(i in Pindex){
-        if(all(P[[i]][-length(P[[i]])] == subFTS)){
-          S <- c(S, P[[i]][length(P[[i]])])
-          S.index <- c(S.index, i)
+      ftsValue2 <- c(0, ftsValue)
+      #Se ano a ser previsto está dentro da série observada
+      ultimo.ano <- as.numeric(names(ftsValue))[length(ftsValue)]
+      if(year > ultimo.ano){
+        ftsValue2 <- c(ftsValue2,NA)
+        names(ftsValue2)[length(ftsValue2)] <- year
+      }
+      index <- which(as.numeric(names(ftsValue2))==year)
+      subFTS <- ftsValue2[1:(index-1)]
+
+      ok <- FALSE
+      while(length(subFTS)>0 && ok==FALSE){
+        Pindex <- which(rsValue==length(subFTS))
+        S <- NULL
+        S.index <- NULL
+        for(i in Pindex){
+          if(all(PValue[[i]][-length(PValue[[i]])] == subFTS)){
+            S <- c(S, PValue[[i]][length(PValue[[i]])])
+            S.index <- c(S.index, i)
+          }
+        }
+        if(!is.null(S)){
+          ok <- TRUE
+        } else {
+          subFTS <- subFTS[-1]
         }
       }
-      if(!is.null(S)){
-        ok <- TRUE
+      S
+      S.index
+
+      #Defuzzifica resposta
+      if(!is.na(S)){
+        x <- A2Value[which(rownames(A2Value)==paste("A",S,sep="")),]
+        ind <- which(x==max(x))
+        values <- c(u[ind],u[max(ind)+1])
+        if(is.na(values[length(values)])){    #Caso selecione o último valor de u
+          values[length(values)] <- max(UValue)
+        }
+        yhatValue <- c(yhatValue, mean(values))
+        names(yhatValue)[length(yhatValue)] <- year
       } else {
-        subFTS <- subFTS[-1]
+        #PREVER
+        x <- A2Value[paste("A",na.omit(PValue[[S.index]]),sep=""),]
+        if(is.vector(x)) x <- t(as.matrix(x))
+        m <- NULL
+        for(j in 1:nrow(x)){
+          index <- which(x[j,]==max(x[j,]))
+          values <- c(u[index],u[max(index)+1])
+        }
+        if(is.na(values[length(values)])){    #Caso selecione o último valor de u
+          values[length(values)] <- max(UValue)
+          m <- c(m, mean(values))
+        }
+        #Cheng (2002)
+        weight <- 1:length(m)
+        #Li and Cheng (2007)
+        weight <- rep(1,length(m))
+        yhatValue <- c(yhatValue, sum(weight * m)/sum(weight) )
+        names(yhatValue)[length(yhatValue)] <- year
       }
     }
-    # S
-    # S.index
 
-    #Defuzzifica resposta
-    if(!is.na(S)){
-      x <- A2[which(rownames(A2)==paste("A",S,sep="")),]
-      ind <- which(x==max(x))
-      values <- c(u[ind],u[max(ind)+1])
-      if(is.na(values[length(values)])){    #Caso selecione o último valor de u
-        values[length(values)] <- max(U)
-      }
-      yhat <- c(yhat, mean(values))
-      names(yhat)[length(yhat)] <- year
-    } else {
-      #PREVER
-      x <- A2[paste("A",na.omit(P[[S.index]]),sep=""),]
-      if(is.vector(x)) x <- t(as.matrix(x))
-      m <- NULL
-      for(j in 1:nrow(x)){
-        index <- which(x[j,]==max(x[j,]))
-        values <- c(u[index],u[max(index)+1])
-      }
-      if(is.na(values[length(values)])){    #Caso selecione o último valor de u
-        values[length(values)] <- max(U)
-        m <- c(m, mean(values))
-      }
-      #Cheng (2002)
-      weight <- 1:length(m)
-      #Li and Cheng (2007)
-      weight <- rep(1,length(m))
-      yhat <- c(yhat, sum(weight * m)/sum(weight) )
-      names(yhat)[length(yhat)] <- year
-    }
-  }
-  return(yhat)
-}
-
-
-
-defuz1w <- function(P) {
-  rs <- NULL
-  w <- 0
-  for(i in 1:length(P)){
-    rs <- c(rs, length(P[[i]])-1)
-    w <- max(w, length(P[[i]])-1)
-  }
-  # #tamanho da fts
-  # q <- length(fts)
-
-  return(rs)
+    return(yhatValue)
 }

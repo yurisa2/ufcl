@@ -285,7 +285,7 @@ for(mcs in 1:REPETITIONS){
 
   FIRST.YEAR <- dados$year[1]+1
   LAST.YEAR <- dados$year[length(dados$year)] +1
-  year <- 1993
+  # year <- 1993
   yhat <- NULL
   #Só pode prever um ano a frente
   for(year in FIRST.YEAR:LAST.YEAR){
@@ -339,8 +339,8 @@ for(mcs in 1:REPETITIONS){
         index <- which(x[j,]==max(x[j,]))
         values <- c(u[index],u[max(index)+1])
       }
-        if(is.na(values[length(values)])){    #Caso selecione o último valor de u
-          values[length(values)] <- max(U)
+      if(is.na(values[length(values)])){    #Caso selecione o último valor de u
+        values[length(values)] <- max(U)
         m <- c(m, mean(values))
       }
       #Cheng (2002)
@@ -387,17 +387,5 @@ forecasting.median <- apply(forecasting, 1, median)
 #Metricas
 o <- dados$appl[-1]
 d <- forecasting.median[-length(forecasting.median)]  #Remover "[]" se não prever futuro
-mape <- round(MAPE(o, d),2)
-(mape.text <- paste(mape,"%",sep=""))
-(rmse <- round(RMSE(o, d),1))
-sum(SE(o,d))
-(mse <- round(MSE(o,d),0))
 
-
-error <- o - d
-mean(error^2)
-Uacc(o,d)
-Uqual(o,d)
-
-
-  ### END ###
+mse <- round(MSE(o,d),0)
