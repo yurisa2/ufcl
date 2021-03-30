@@ -17,13 +17,13 @@ library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
+PATH <- "/home/yurisa2/Documents/UFCL"
 #ORDEM n+1 para calcularmos até ordem n
 ORDEM <- 15    #High-order FTS. Maximum of 9th order
 k0 <- 7  #Number of intervals
 LINGUISTIC.TERMS <- 7 ## Numero de termos linguisticos
 ##tem que ser igual a numero de intervalos???
-REPETITIONS <- 30   ##Monte Carlo simulation repetitions
+REPETITIONS <- 3   ##Monte Carlo simulation repetitions
 fcm.method <- "ufcl" #"ufcl"  #or "cmeans"
 
 errorcols <- NULL

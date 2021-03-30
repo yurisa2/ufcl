@@ -17,7 +17,7 @@ library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
+PATH <- "/home/yurisa2/Documents/UFCL"
 #ORDEM n+1 para calcularmos até ordem n
 ORDEM <- 15    #High-order FTS. Maximum of 9th order
 k0 <- 7  #Number of intervals
@@ -104,24 +104,30 @@ for(mcs in 1:REPETITIONS){
 
   #Identifica todas as precedencias - Ordem nth
   #----------
+
+  supPrec <- list()
+
   prec <- vector("list",ORDEM)
   # for(n in 1:ORDEM) assign(paste("prec",n,sep=""), c(0,fts[1:n]))     #Iniciando variaveis com NULL, prec1, prec2, prec3...
-  for(n in 1:ORDEM) prec[paste("prec",n,sep="")] <-  c(0,fts[1:n])  # STOPPED HERE
+  for(n in 1:ORDEM) supPrec[[paste("prec",n,sep="")]] <-  c(0,fts[1:n])  # STOPPED HERE
   for(i in 2:length(fts)){
-    prec1 <- rbind(prec1, c(fts[(i-1):i+1]))   #Acrescenta NA
+    supPrec[["prec1"]] <- rbind(supPrec[["prec1"]], c(fts[(i-1):i+1]))   #Acrescenta NA
     for(k in 2:min(i,ORDEM)){
-      assign(paste("prec",k,sep=""), rbind(get(paste("prec",k,sep="")), fts[(i-k+1):(i+1)]) )
+      supPrec[[paste("prec",k,sep="")]] <- rbind(supPrec[[paste("prec",k,sep="")]]  , fts[(i-k+1):(i+1)])
+
     }
   }
 
   for(n in 1:length(prec)){
-    aux <- get(paste("prec",n,sep=""))
+    # n <- 1
+    aux <- supPrec[[paste("prec",n,sep="")]]
     aux <- unique(aux)
     aux <- aux[order(aux[,1],aux[,2]),]
-    assign(paste("prec",n,sep=""),aux)
+    supPrec[[paste("prec",n,sep="")]] <- aux
     prec[[n]] <- aux
   }
   prec
+  supPrec[["prec1"]]
   typeof(prec)
   fts
   paste("A",fts,sep="")
@@ -164,7 +170,8 @@ for(mcs in 1:REPETITIONS){
   #### Identifying all Certain Transitions ####
 
   #Initializing C
-  C <- as.character(unique(prec1[,2]))  #Quem eu quero prever
+  C <- as.character(unique(supPrec[["prec1"]][,2]))  #Quem eu quero prever
+  # supPrec[["prec1"]][,2]
   P <- NULL
   #C <- "NA"
   while(length(C)>0){
@@ -177,7 +184,8 @@ for(mcs in 1:REPETITIONS){
     #LOOP
     while(w==length(P) && (C.length==length(C))) {
       frg[[n]]
-      aux <- get(paste("prec",n,sep=""))
+      # aux <- get(paste("prec",n,sep=""))
+      aux <- data.frame(supPrec[paste("prec",n,sep="")])
 
       if(is.na(f[length(f)])){
         S <- NA
@@ -211,6 +219,8 @@ for(mcs in 1:REPETITIONS){
           aux <- aux[-which(is.na(aux[,ncol(aux)])),]
         }
 
+        ncol(aux)
+        as.vector(aux)
         #A1 prevê A1 e A2. Logo, uncertain transition
         #Portanto, A1, deve ir para backtracking
         #Caso contrário, essa relação unica vai para P
@@ -238,7 +248,7 @@ for(mcs in 1:REPETITIONS){
 
           #Backtracking: série de antecedentes
           nome.var <- paste("prec",n+1,sep="")
-          vars <- get(nome.var)
+          vars <-data.frame(supPrec[nome.var])
           vars <- na.omit(vars)
           vetor <- NULL
           for(i in 1:nrow(vars)){
