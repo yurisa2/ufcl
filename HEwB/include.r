@@ -203,10 +203,13 @@ calcPrec <- function(ftsValue, order) {
   for(n in 1:order) precVal[[paste("prec",n,sep="")]] <-  c(0,fts[1:n])  # STOPPED HERE
   for(i in 2:length(fts)){
     precVal[["prec1"]] <- rbind(precVal[["prec1"]], c(fts[(i-1):i+1]))   #Acrescenta NA
-    for(k in 2:min(i,order)){
-      precVal[[paste("prec",k,sep="")]] <- rbind(precVal[[paste("prec",k,sep="")]]  , fts[(i-k+1):(i+1)])
 
+    for(k in 2:min(i,order)){
+      precProb <- fts[(i-k+1):(i+1)]
+      precVal[[paste("prec",k,sep="")]] <- rbind(precVal[[paste("prec",k,sep="")]]  , precProb)
+      # if(is.na(fts[(i+1)])) print( precProb) #ProbLocation BREAKPOINT1
     }
+
   }
   return(precVal)
 }
@@ -411,6 +414,8 @@ prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
         names(yhatValue)[length(yhatValue)] <- year
       }
     }
+
+    yhatValue <- yhatValue[-length(yhatValue)] #Related to BREAKPOINT1
 
     return(yhatValue)
 }

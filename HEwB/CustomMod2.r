@@ -11,7 +11,7 @@ ORDEM <- 15    #High-order FTS. Maximum of 9th order
 k0 <- 7  #Number of intervals
 LINGUISTIC.TERMS <- 7 ## Numero de termos linguisticos
 ##tem que ser igual a numero de intervalos???
-REPETITIONS <- 3   ##Monte Carlo simulation repetitions
+REPETITIONS <- 30   ##Monte Carlo simulation repetitions
 fcmMethod <- "ufcl" #"ufcl"  #or "cmeans"
 
 errorcols <- NULL
