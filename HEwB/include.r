@@ -205,8 +205,8 @@ calcPrec <- function(ftsValue, order) {
     precVal[["prec1"]] <- rbind(precVal[["prec1"]], c(fts[(i-1):i+1]))   #Acrescenta NA
 
     for(k in 2:min(i,order)){
-      precProb <- fts[(i-k+1):(i+1)]
-      precVal[[paste("prec",k,sep="")]] <- rbind(precVal[[paste("prec",k,sep="")]]  , precProb)
+      # precProb <- fts[(i-k+1):(i+1)]
+      precVal[[paste("prec",k,sep="")]] <- rbind(precVal[[paste("prec",k,sep="")]]  , fts[(i-k+1):(i+1)])
       # if(is.na(fts[(i+1)])) print( precProb) #ProbLocation BREAKPOINT1
     }
 
@@ -229,106 +229,118 @@ defPrec <- function(precVal, order) {
 
 
 idCertainTransitions <- function(precVal, frgValue) {
-    #Initializing C
-    C <- as.character(unique(precVal[["prec1"]][,2]))  #Quem eu quero prever
-    # precVal[["prec1"]][,2]
-    PValue <- NULL
-    #C <- "NA"
-    while(length(C)>0){
-      C.length <- length(C)
-      w <- length(PValue)
+  #Initializing C
+  C <- as.character(unique(precVal[["prec1"]][,2]))  #Quem eu quero prever
+  # precVal[["prec1"]][,2]
+  PValue <- NULL
+  #C <- "NA"
+  while(length(C)>0){
+    C.length <- length(C)
+    w <- length(PValue)
 
-      f <- as.numeric(strsplit(C[1]," ")[[1]]) #PValuerimeiro elemento de C, vetor
-      n <- length(f)
+    f <- as.numeric(strsplit(C[1]," ")[[1]]) #PValuerimeiro elemento de C, vetor
+    n <- length(f)
 
-      #LOOPValue
-      while(w==length(PValue) && (C.length==length(C))) {
-        frg[[n]]
-        # aux <- get(paste("prec",n,sep=""))
-        aux <- data.frame(precVal[paste("prec",n,sep="")])
+    #LOOPValue
+    while(w==length(PValue) && (C.length==length(C))) {
+      frgValue[[n]]
+      # aux <- get(paste("prec",n,sep=""))
+      aux <- data.frame(precVal[paste("prec",n,sep="")])
 
-        if(is.na(f[length(f)])){
-          S <- NA
-          #Vetor que indica onde previsto igual NA
-          vetor <- is.na(aux[,ncol(aux)])
-          antecedentes <- aux[vetor,-ncol(aux)]
-          #Vetor que identifica quais(e quantas) ocorrências iguais a antecedentes de NA
-          vetor <- NULL
-          for(linha in 1:nrow(aux)){
-            vetor <- c(vetor, all(aux[linha,-ncol(aux)]==antecedentes))
-          }
-          origem <- aux[vetor,-ncol(aux)]
-          #aux[aux[,1]==aux[vetor,1],1]
-          destino <- aux[vetor,ncol(aux)]
-          if(length(unique(destino))>1){
-            C <- C[-1]
-            C <- c(paste(paste(unique(origem),collapse=" "),S),C)
-            w <- Inf   #Sai do inner WHILE
-            next()
-          } else {
-            S <- as.character(S)
-            PValue[[w+1]] <- as.numeric(c(origem, destino))
-            C <- C[-1]
-            #message(paste("****\nPValue:",paste(PValue,collapse="/"),"\nC:",paste(C,collapse="/"),"\n****\n"))
-          }
+      if(is.na(f[length(f)])){
+
+        # print("BREAKPONT CAIU NO IF")
+
+        S <- NA
+        #Vetor que indica onde previsto igual NA
+        vetor <- is.na(aux[,ncol(aux)])
+        antecedentes <- aux[vetor,-ncol(aux)]
+        #Vetor que identifica quais(e quantas) ocorrências iguais a antecedentes de NA
+        vetor <- NULL
+        for(linha in 1:nrow(aux)){
+          vetor <- c(vetor, all(aux[linha,-ncol(aux)]==antecedentes))
+        }
+        origem <- aux[vetor,-ncol(aux)]
+        #aux[aux[,1]==aux[vetor,1],1]
+        destino <- aux[vetor,ncol(aux)]
+        if(length(unique(destino))>1){
+          C <- C[-1]
+          C <- c(paste(paste(unique(origem),collapse=" "),S),C)
+          w <- Inf   #Sai do inner WHILE
+          next()
         } else {
+          S <- as.character(S)
+          PValue[[w+1]] <- as.numeric(c(origem, destino))
+          C <- C[-1]
+          #message(paste("****\nPValue:",paste(PValue,collapse="/"),"\nC:",paste(C,collapse="/"),"\n****\n"))
+        }
+      } else {
 
-          #Removendo linha cuja última coluna seja NA
-          if(any(is.na(aux[,ncol(aux)]))){
-            aux <- aux[-which(is.na(aux[,ncol(aux)])),]
-          }
+        # print("BREAKPONT CAIU NO ELSE")
 
-          ncol(aux)
-          as.vector(aux)
-          #A1 prevê A1 e A2. Logo, uncertain transition
-          #PValueortanto, A1, deve ir para backtracking
-          #Caso contrário, essa relação unica vai para PValue
+
+        #Removendo linha cuja última coluna seja NA
+        if(any(is.na(aux[,ncol(aux)]))){
+          aux <- aux[-which(is.na(aux[,ncol(aux)])),]
+          # print("BREAKPONT REMOVER LINHA CUJA COLUNA SEJA NA")
+        }
+
+        ncol(aux)
+        as.vector(aux)
+        #A1 prevê A1 e A2. Logo, uncertain transition
+        #PValueortanto, A1, deve ir para backtracking
+        #Caso contrário, essa relação unica vai para PValue
+        vetor <- NULL
+        for(linha in 1:nrow(aux)){
+          vetor <- c(vetor, all(aux[linha,-ncol(aux)]==f))
+        }
+
+        #Identificando o(s) próximo(s) valor(es)
+        S <- aux[vetor,ncol(aux)]
+
+        #From Table 6 (Li and Cheng, 2007)
+        if(length(S)==0) {
+          PValue[[w+1]] <- as.numeric(c(strsplit(C[1], " ")[[1]], NA))
+          C <- C[-1]
+          R <- NULL
+        }
+        if(length(S)==1){
+          S <- as.character(S)
+          PValue[[w+1]] <- as.numeric(c(strsplit(C[1], " ")[[1]], strsplit(S, " ")[[1]]))
+          C <- C[-1]
+        }
+
+        # ISTO É ESTRANHO, NO RELATION TO PVALUE
+        if(length(S)>1){
+          C <- C[-1]
+
+
+          # print("BREAKPONT BACKTRACKING")
+
+          #Backtracking: série de antecedentes
+          nome.var <- paste("prec",n+1,sep="")
+          vars <-data.frame(precVal[nome.var])
+          vars <- na.omit(vars)
           vetor <- NULL
-          for(linha in 1:nrow(aux)){
-            vetor <- c(vetor, all(aux[linha,-ncol(aux)]==f))
+          for(i in 1:nrow(vars)){
+            vetor <- c(vetor, all(vars[i,-c(1,ncol(vars))]==f))
           }
-
-          #Identificando o(s) próximo(s) valor(es)
-          S <- aux[vetor,ncol(aux)]
-
-          #From Table 6 (Li and Cheng, 2007)
-          if(length(S)==0) {
-            PValue[[w+1]] <- as.numeric(c(strsplit(C[1], " ")[[1]], NA))
-            C <- C[-1]
-            R <- NULL
+          vars <- vars[vetor,-ncol(vars)]
+          vars <- unique(vars)
+          R <- NULL
+          for(i in 1:nrow(vars)){
+            R[i] <- paste(vars[i,], collapse=" ")
           }
-          if(length(S)==1){
-            S <- as.character(S)
-            PValue[[w+1]] <- as.numeric(c(strsplit(C[1], " ")[[1]], strsplit(S, " ")[[1]]))
-            C <- C[-1]
-          }
-          if(length(S)>1){
-            C <- C[-1]
-
-            #Backtracking: série de antecedentes
-            nome.var <- paste("prec",n+1,sep="")
-            vars <-data.frame(precVal[nome.var])
-            vars <- na.omit(vars)
-            vetor <- NULL
-            for(i in 1:nrow(vars)){
-              vetor <- c(vetor, all(vars[i,-c(1,ncol(vars))]==f))
-            }
-            vars <- vars[vetor,-ncol(vars)]
-            vars <- unique(vars)
-            R <- NULL
-            for(i in 1:nrow(vars)){
-              R[i] <- paste(vars[i,], collapse=" ")
-            }
-            C <- c(R, C)
-            if(length(R)==1){
-              w <- Inf
-            }
+          C <- c(R, C)
+          if(length(R)==1){
+            w <- Inf
           }
         }
       }
     }
+  }
 
-return(PValue)
+  return(PValue)
 }
 
 defuzRle1 <- function(PValue) {
