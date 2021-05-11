@@ -356,7 +356,7 @@ defuzRle1 <- function(PValue) {
 prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
 
     FIRST.ITEM <- 2
-    LAST.ITEM <- length(data)+10
+    LAST.ITEM <- length(data)+2
     # year <- 1993
     yhatValue <- NULL
     #Só pode prever um ano a frente
@@ -410,29 +410,30 @@ prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
         if(is.vector(x)) x <- t(as.matrix(x))
 
         # print(paste("x", x))
-        print(paste("u", u))
+        # print(paste("u", u))
 
         m <- NULL
 
         for(j in 1:nrow(x)){
           index <- which(x[j,]==max(x[j,]))
           values <- c(u[index],u[max(index)+1])
-        }
 
-        print(paste("values", values))
+        print(paste("INITIAL", length(values))) # DEBUG
+        print(paste("values", values)) # DEBUG
 
         if(is.na(values[length(values)])){    #Caso selecione o último valor de u
           values[length(values)] <- max(UValue)
-          m <- c(m, mean(values))
         }
+        m <- c(m, mean(values))
+      }
 
-        print(paste("m", m))
+        # print(paste("m", m))
         #Cheng (2002)
         weight <- 1:length(m)
         #Li and Cheng (2007)
         weight <- rep(1,length(m))
-        print(paste("weight", weight))
-        print(paste("year", year))
+        # print(paste("weight", weight))
+        # print(paste("year", year))
         yhatValue <- c(yhatValue, sum(weight * m)/sum(weight) )
         names(yhatValue)[length(yhatValue)] <- year
       }
