@@ -25,7 +25,7 @@ source("HEwB/include.r")
 dados <- read.csv("data/contral.csv", header=TRUE)
 dataPoints <- dados$appl
 
-dataPoints <- tail(dataPoints, 40)
+dataPoints <- tail(dataPoints, 70)
 
 
 
@@ -53,9 +53,7 @@ supPrec <- calcPrec(fts, ORDEM)
 
 prec <- defPrec(supPrec, ORDEM)
 frg <- fuzzyRelGroups(ORDEM, prec)
+
 P <- idCertainTransitions(supPrec, frg)
 
-
-rs <- defuzRle1(P)
-
-yhat <- prediction(dataPoints, fts, A2, U, P, rs)
+P[[length(P)]] <- head(P[[length(P)]],-1)

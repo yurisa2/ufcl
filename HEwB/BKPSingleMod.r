@@ -25,7 +25,7 @@ source("HEwB/include.r")
 dados <- read.csv("data/contral.csv", header=TRUE)
 dataPoints <- dados$appl
 
-dataPoints <- tail(dataPoints, 40)
+dataPoints <- tail(dataPoints, 100)
 
 
 
@@ -56,6 +56,44 @@ frg <- fuzzyRelGroups(ORDEM, prec)
 P <- idCertainTransitions(supPrec, frg)
 
 
-rs <- defuzRle1(P)
+supPrec[["prec9"]]
 
+Pprocess <- head(P[[length(P)]], -1) # GET ALL MINUS NA Delisting IT
+
+
+searchVec <- function(PprocessValue, Pvalue) {
+  ret <- FALSE
+  inc <- 0
+  for(i in head(Pvalue, -1)) {
+    inc <- inc + 1
+
+    i <- as.vector(i)
+
+    iB <- head(i, -1)
+    if(all(iB == PprocessValue) && length(iB) == length(PprocessValue)) {
+      print(inc)
+      print("ACHEI")
+      print(i)
+
+      ret <- inc
+    }
+  }
+
+  return(ret)
+}
+
+searchVec(tail(Pprocess, -1) , P)
+length(dataPoints)
+length(P)
+
+searchVec(Pprocess , P)
+
+
+CTest <-
+
+as.character(unique(supPrec[["prec9"]][,2]))
+
+
+rs <- defuzRle1(P)
 yhat <- prediction(dataPoints, fts, A2, U, P, rs)
+forecasting <- cbind(forecasting, yhat)

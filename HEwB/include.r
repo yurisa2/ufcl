@@ -107,7 +107,7 @@ clusteringUBuild <- function(data) {
   Dmin <- min(data)
   Dmax <- max(data)
   D1 <- 0 #55
-  D2 <- 0   #663  #Para dar um máximo de 7000
+  D2 <- 700   #663  #Para dar um máximo de 7000
   UValue <- c(Dmin-D1, Dmax+D2)
 
   return(UValue)
@@ -205,11 +205,9 @@ calcPrec <- function(ftsValue, order) {
     precVal[["prec1"]] <- rbind(precVal[["prec1"]], c(fts[(i-1):i+1]))   #Acrescenta NA
 
     for(k in 2:min(i,order)){
-      # precProb <- fts[(i-k+1):(i+1)]
-      precVal[[paste("prec",k,sep="")]] <- rbind(precVal[[paste("prec",k,sep="")]]  , fts[(i-k+1):(i+1)])
-      # if(is.na(fts[(i+1)])) print( precProb) #ProbLocation BREAKPOINT1
+      precProb <- fts[(i-k+1):(i+1)]
+      precVal[[paste("prec",k,sep="")]] <- rbind(precVal[[paste("prec",k,sep="")]]  , precProb)
     }
-
   }
   return(precVal)
 }
@@ -314,7 +312,6 @@ idCertainTransitions <- function(precVal, frgValue) {
         if(length(S)>1){
           C <- C[-1]
 
-
           # print("BREAKPONT BACKTRACKING")
 
           #Backtracking: série de antecedentes
@@ -359,7 +356,7 @@ defuzRle1 <- function(PValue) {
 prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
 
     FIRST.ITEM <- 2
-    LAST.ITEM <- length(data)+1
+    LAST.ITEM <- length(data)+10
     # year <- 1993
     yhatValue <- NULL
     #Só pode prever um ano a frente
@@ -407,21 +404,35 @@ prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
         names(yhatValue)[length(yhatValue)] <- year
       } else {
         #PREVER
+
         x <- A2Value[paste("A",na.omit(PValue[[S.index]]),sep=""),]
+
         if(is.vector(x)) x <- t(as.matrix(x))
+
+        # print(paste("x", x))
+        print(paste("u", u))
+
         m <- NULL
+
         for(j in 1:nrow(x)){
           index <- which(x[j,]==max(x[j,]))
           values <- c(u[index],u[max(index)+1])
         }
+
+        print(paste("values", values))
+
         if(is.na(values[length(values)])){    #Caso selecione o último valor de u
           values[length(values)] <- max(UValue)
           m <- c(m, mean(values))
         }
+
+        print(paste("m", m))
         #Cheng (2002)
         weight <- 1:length(m)
         #Li and Cheng (2007)
         weight <- rep(1,length(m))
+        print(paste("weight", weight))
+        print(paste("year", year))
         yhatValue <- c(yhatValue, sum(weight * m)/sum(weight) )
         names(yhatValue)[length(yhatValue)] <- year
       }
