@@ -200,12 +200,12 @@ fuzzyRelGroups <- function(order, prec) {
 calcPrec <- function(ftsValue, order) {
   precVal <- list()
 
-  for(n in 1:order) precVal[[paste("prec",n,sep="")]] <-  c(0,fts[1:n])  # STOPPED HERE
-  for(i in 2:length(fts)){
-    precVal[["prec1"]] <- rbind(precVal[["prec1"]], c(fts[(i-1):i+1]))   #Acrescenta NA
+  for(n in 1:order) precVal[[paste("prec",n,sep="")]] <-  c(0,ftsValue[1:n])  # STOPPED HERE
+  for(i in 2:length(ftsValue)){
+    precVal[["prec1"]] <- rbind(precVal[["prec1"]], c(ftsValue[(i-1):i+1]))   #Acrescenta NA
 
     for(k in 2:min(i,order)){
-      precProb <- fts[(i-k+1):(i+1)]
+      precProb <- ftsValue[(i-k+1):(i+1)]
       precVal[[paste("prec",k,sep="")]] <- rbind(precVal[[paste("prec",k,sep="")]]  , precProb)
     }
   }
@@ -353,7 +353,7 @@ defuzRle1 <- function(PValue) {
   return(rsValue)
 }
 
-prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
+prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue, uValue) {
 
     FIRST.ITEM <- 2
     LAST.ITEM <- length(data)+2
@@ -396,7 +396,7 @@ prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
       if(!is.na(S)){
         x <- A2Value[which(rownames(A2Value)==paste("A",S,sep="")),]
         ind <- which(x==max(x))
-        values <- c(u[ind],u[max(ind)+1])
+        values <- c(uValue[ind],uValue[max(ind)+1])
         if(is.na(values[length(values)])){    #Caso selecione o último valor de u
           values[length(values)] <- max(UValue)
         }
@@ -404,6 +404,9 @@ prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
         names(yhatValue)[length(yhatValue)] <- year
       } else {
         #PREVER
+        #Li and Cheng (2007) p. 1915
+
+
 
         x <- A2Value[paste("A",na.omit(PValue[[S.index]]),sep=""),]
 
@@ -416,10 +419,10 @@ prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
 
         for(j in 1:nrow(x)){
           index <- which(x[j,]==max(x[j,]))
-          values <- c(u[index],u[max(index)+1])
+          values <- c(uValue[index],uValue[max(index)+1])
 
-        print(paste("INITIAL", length(values))) # DEBUG
-        print(paste("values", values)) # DEBUG
+        # print(paste("INITIAL", length(values))) # DEBUG
+        # print(paste("values", values)) # DEBUG
 
         if(is.na(values[length(values)])){    #Caso selecione o último valor de u
           values[length(values)] <- max(UValue)
@@ -427,6 +430,7 @@ prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
         m <- c(m, mean(values))
       }
 
+        # com os pesos todos iguais dá média
         # print(paste("m", m))
         #Cheng (2002)
         weight <- 1:length(m)
@@ -442,4 +446,43 @@ prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue) {
     yhatValue <- yhatValue[-length(yhatValue)] #Related to BREAKPOINT1
 
     return(yhatValue)
+}
+
+runModel <- function(dataPoints, k0, centers, fcmMethod, ORDEM, LINGUISTIC.TERMS) {
+
+
+  al.cl <- clusteringInitial(dataPoints, k0, centers, fcmMethod)
+  Uval <- clusteringUBuild(dataPoints)
+  uval <- clusteringPartitionU(Uval, al.cl$centers, k0)
+  A2val <- lingTermsA2(LINGUISTIC.TERMS, k0)
+  ftsVal <- lingTermsFTS(dataPoints, al.cl)
+  supPrec <- calcPrec(ftsVal, ORDEM)
+  precVal <- defPrec(supPrec, ORDEM)
+  frgVal <- fuzzyRelGroups(ORDEM, precVal)
+  Pval <- idCertainTransitions(supPrec, frgVal)
+  rsVal <- defuzRle1(Pval)
+  yhatVal <- prediction(dataPoints, ftsVal, A2val, Uval, Pval, rsVal, uval)
+
+
+  return(yhatVal)
+}
+
+getMetrics <- function(original, predicted) {
+
+predicted <- c(NA, yhat)
+original <- c(data, NA)
+
+resultingPrime <- cbind(original, predicted)
+
+
+resulting <- cbind(original, predicted)
+
+resulting <- head(tail(resulting, -1), -2)
+
+
+resulting <- data.frame(resulting)
+
+errorMSE <- MSE(resulting$original, resulting$predicted)
+
+return(errorMSE)
 }
