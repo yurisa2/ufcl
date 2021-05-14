@@ -5,7 +5,7 @@ library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
+PATH <- "/home/yurisa2/Documents/UFCL"
 
 #ORDEM n+1 para calcularmos até ordem n
 ORDER <- 15    #High-order FTS. Maximum of 9th order
@@ -22,12 +22,27 @@ source("HEwB/include.r")
 dados <- read.csv("data/contral.csv", header=TRUE)
 data <- dados$appl
 
-# data <- head(data, 79)
+# data <- head(data, 80)
+
+windowSize <- 80
 
 
-centersVal <- c(0, sample(min(data[data!=0]):max(data),k0-1))
-centersVal <- as.matrix(centersVal)
+forePlus1 <- NULL
 
-yhat <- runModel(data, intervalos, centersVal, "ufcl", ORDER, termos)
+for (i in windowSize:length(data)){
+  dataWindowed <- data[(i-windowSize+1):(i+windowSize)]
 
-getMetrics(data,yhat)
+  forecasting <- runMCS(dataWindowed, intervalos,  "ufcl", ORDER, termos, 3)
+  forecasting.median <- apply(forecasting, 1, median)
+  forePlus1 <- c(forePlus1, as.numeric(tail(forecasting.median, 1)))
+
+
+  print(paste("Iteration:",i,Sys.time()))
+ }
+
+
+forePlus1
+
+
+
+getMetrics(data,forecasting.median)

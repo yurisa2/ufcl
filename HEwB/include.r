@@ -469,7 +469,7 @@ runModel <- function(dataPoints, k0, centers, fcmMethod, ORDEM, LINGUISTIC.TERMS
 
 getMetrics <- function(original, predicted) {
 
-predicted <- c(NA, yhat)
+predicted <- c(NA, predicted)
 original <- c(data, NA)
 
 resultingPrime <- cbind(original, predicted)
@@ -485,4 +485,24 @@ resulting <- data.frame(resulting)
 errorMSE <- MSE(resulting$original, resulting$predicted)
 
 return(errorMSE)
+}
+
+
+
+runMCS <- function(data, intervalos, fcmMethod, ORDER, termos, REPS) {
+
+  forecasting <- NULL
+
+  for (i in 1:REPS){
+
+  centersVal <- c(0, sample(min(data[data!=0]):max(data),intervalos-1))
+  centersVal <- as.matrix(centersVal)
+
+  yhat <- runModel(data, intervalos, centersVal, fcmMethod, ORDER, termos)
+
+  forecasting <- cbind(forecasting, yhat)
+
+  }
+
+  return(forecasting)
 }
