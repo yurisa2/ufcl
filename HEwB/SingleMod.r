@@ -5,7 +5,7 @@ library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/Documents/UFCL"
+PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
 
 #ORDEM n+1 para calcularmos até ordem n
 ORDER <- 15    #High-order FTS. Maximum of 9th order
@@ -32,7 +32,7 @@ forePlus1 <- NULL
 for (i in windowSize:length(data)){
   dataWindowed <- data[(i-windowSize+1):(i+windowSize)]
 
-  forecasting <- runMCS(dataWindowed, intervalos,  "ufcl", ORDER, termos, 3)
+  forecasting <- runMCS(dataWindowed, intervalos,  "ufcl", ORDER, termos, 100)
   forecasting.median <- apply(forecasting, 1, median)
   forePlus1 <- c(forePlus1, as.numeric(tail(forecasting.median, 1)))
 

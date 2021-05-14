@@ -103,9 +103,9 @@ Uacc <- function(y, yhat){
 
 
 ##### STEP 1
-clusteringUBuild <- function(data) {
-  Dmin <- min(data)
-  Dmax <- max(data)
+clusteringUBuild <- function(dataVal) {
+  Dmin <- min(dataVal)
+  Dmax <- max(dataVal)
   D1 <- 0 #55
   D2 <- 700   #663  #Para dar um máximo de 7000
   UValue <- c(Dmin-D1, Dmax+D2)
@@ -120,9 +120,9 @@ clusteringPartitionU <- function(UValue, centers, intervals) {
   return(uValue)
 }
 
-clusteringInitial <- function (data, intervals, centers, method = "ufcl") {
+clusteringInitial <- function (dataVal, intervals, centers, method = "ufcl") {
 
-  initialClustering <- cmeans(data,intervals, centers=centers, method=method)
+  initialClustering <- cmeans(dataVal,intervals, centers=centers, method=method)
   #Ordered fuzzy sets are obtained according to the ascending ordered centers
   initialClustering$membership <- initialClustering$membership[,order(initialClustering$centers)]
   initialClustering$size[order(initialClustering$centers)]
@@ -153,9 +153,9 @@ lingTermsA2 <- function(terms, intervals) {
   return(A2Value)
 }
 
-lingTermsFTS <- function(data, clusteringInitial) {
+lingTermsFTS <- function(dataVal, clusteringInitial) {
   mu <- clusteringInitial$membership
-  rownames(mu) <- 1:length(data)
+  rownames(mu) <- 1:length(dataVal)
 
   ftsValue <- apply(mu, 1, findMax)    #FTS somente com números dos termos linguísticos
 
@@ -353,10 +353,10 @@ defuzRle1 <- function(PValue) {
   return(rsValue)
 }
 
-prediction <- function(data, ftsValue, A2Value, UValue, PValue, rsValue, uValue) {
+prediction <- function(dataVal, ftsValue, A2Value, UValue, PValue, rsValue, uValue) {
 
     FIRST.ITEM <- 2
-    LAST.ITEM <- length(data)+2
+    LAST.ITEM <- length(dataVal)+2
     # year <- 1993
     yhatValue <- NULL
     #Só pode prever um ano a frente
@@ -470,7 +470,7 @@ runModel <- function(dataPoints, k0, centers, fcmMethod, ORDEM, LINGUISTIC.TERMS
 getMetrics <- function(original, predicted) {
 
 predicted <- c(NA, predicted)
-original <- c(data, NA)
+original <- c(original, NA)
 
 resultingPrime <- cbind(original, predicted)
 
@@ -489,16 +489,16 @@ return(errorMSE)
 
 
 
-runMCS <- function(data, intervalos, fcmMethod, ORDER, termos, REPS) {
+runMCS <- function(dataVal, intervalos, fcmMethod, orderVal, terms, reps) {
 
   forecasting <- NULL
 
-  for (i in 1:REPS){
+  for (i in 1:reps){
 
-  centersVal <- c(0, sample(min(data[data!=0]):max(data),intervalos-1))
+  centersVal <- c(0, sample(min(dataVal[dataVal!=0]):max(dataVal),intervalos-1))
   centersVal <- as.matrix(centersVal)
 
-  yhat <- runModel(data, intervalos, centersVal, fcmMethod, ORDER, termos)
+  yhat <- runModel(dataVal, intervalos, centersVal, fcmMethod, orderVal, terms)
 
   forecasting <- cbind(forecasting, yhat)
 
