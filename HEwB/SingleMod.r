@@ -1,11 +1,9 @@
-
 rm(list=ls())
 
-library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
+PATH <- "C:/inetpub/wwwroot/ufcl"
 
 #ORDEM n+1 para calcularmos até ordem n
 ORDER <- 15    #High-order FTS. Maximum of 9th order
@@ -20,29 +18,16 @@ setwd(PATH)
 source("HEwB/include.r")
 
 dados <- read.csv("data/contral.csv", header=TRUE)
+#data <- tail(dados$appl, 110)
 data <- dados$appl
+
 
 # data <- head(data, 80)
 
-windowSize <- 80
+windowSize <- 111
 
-
-forePlus1 <- NULL
-
-for (i in windowSize:length(data)){
-  dataWindowed <- data[(i-windowSize+1):(i+windowSize)]
-
-  forecasting <- runMCS(dataWindowed, intervalos,  "ufcl", ORDER, termos, 100)
-  forecasting.median <- apply(forecasting, 1, median)
-  forePlus1 <- c(forePlus1, as.numeric(tail(forecasting.median, 1)))
-
-
-  print(paste("Iteration:",i,Sys.time()))
- }
-
-
-forePlus1
+forePlus1off <- runRWindows(data,intervalos,"ufcl",ORDER,termos,30, windowSize)
+getRWMSE(data, forePlus1off, windowSize)
 
 
 
-getMetrics(data,forecasting.median)
