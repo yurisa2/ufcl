@@ -11,30 +11,42 @@ source("HEwB/include.r")
 
 dados <- read.csv("data/contral.csv", header=TRUE)
 data <- tail(dados$appl, 110)
-# data <- dados$appl
-
-toString(dados)
-
 windowSize <- 106
 
 
+# data <- dados$appl
 
-r <- GET("http://localhost:8080/ufcl/webservice/params.php")
-htcontent <- content(r, "text")
-
-params <- strsplit(htcontent, ",")[[1]]
+# toString(dados)
 
 
-toString(params)
+# r <- GET("http://localhost:8080/ufcl/webservice/params.php")
+# htcontent <- content(r, "text")
+#
+# params <- GET("http://localhost:8080/ufcl/webservice/params.php")
+# htcontent <- content(params, "text")
+# params <- strsplit(htcontent, ",")[[1]]
 
-params[1]
+# intsvals, orderi, termosi, method
+# data,interv,method,ord,term,mcsReps, windowSize
+
+# toString(params)
 
 
 gotData <- TRUE
-while (gotData = TRUE)  {
-    params <- GET("http://localhost:8080/ufcl/webservice/params.php")
-    print(counter, Sys.time())
-    results <- runRWindows(data,params[1],"ufcl",getParameters(counter, parCombs, 2),getParameters(counter, parCombs, 2),30, windowSize)
+counter <- 0
 
+while (gotData == TRUE)  {
+    params <- GET("http://localhost:8080/ufcl/webservice/params.php")
+    htcontent <- content(params, "text")
+    params <- strsplit(htcontent, ",")[[1]]
+
+    print(params)
+
+    # print(counter, Sys.time())
+    print(counter)
+    results <- try(runRWindows(data,as.integer(params[2]),params[4],as.integer(params[3]),as.integer(params[2]),30,windowSize))
+
+    if(length(params) < 1) gotData <- FALSE
     counter <- counter + 1
+
 }

@@ -141,6 +141,9 @@ clusteringInitial <- function (dataVal, intervals, centers, method = "ufcl") {
 
 lingTermsA2 <- function(terms, intervals) {
 
+  print(terms)
+  print(intervals)
+
   A2Value <- matrix(0, nrow=terms, ncol=intervals)
   for(i in 1:terms){
     A2Value[i,i] <- 1
@@ -192,10 +195,10 @@ fuzzyRelGroups <- function(order, prec) {
       }
     }
 
-    
-    #Error in frgValue[[n]] : 
+
+    #Error in frgValue[[n]] :
     #attempt to select less than one element in integerOneIndex
-    
+
     frgValue[[n]] <- group
     frgValue[[n]]$prec <- as.matrix(origin)
 
@@ -416,12 +419,12 @@ prediction <- function(dataVal, ftsValue, A2Value, UValue, PValue, rsValue, uVal
         #Li and Cheng (2007) p. 1915
 
         if(length(S) == 0) next()
-          
+
         #if(length(S.index) > 1) S.index <- head(S.index, 1)
         # print(S.index) # DEBUG LAST LEG
         #x <- A2Value[paste("A",na.omit(PValue[[S.index]]),sep=""),] # Original
         x <- A2Value[paste("A",na.omit(PValue[[head(S.index, 1)]]),sep=""),]
-        
+
 
         if(is.vector(x)) x <- t(as.matrix(x))
 
@@ -458,8 +461,8 @@ prediction <- function(dataVal, ftsValue, A2Value, UValue, PValue, rsValue, uVal
 
     yhatValue <- yhatValue[-length(yhatValue)] #Related to BREAKPOINT1
 
-    
-    
+
+
     rm(S.index)
     rm(weight)
     rm(values)
@@ -472,8 +475,8 @@ prediction <- function(dataVal, ftsValue, A2Value, UValue, PValue, rsValue, uVal
     rm(ok)
     rm(ftsValue2)
     rm(j)
-    
-    
+
+
     return(yhatValue)
 }
 
@@ -492,7 +495,7 @@ runModel <- function(dataPoints, k0, centers, fcmMethod, ORDEM, LINGUISTIC.TERMS
   rsVal <- defuzRle1(Pval)
   yhatVal <- prediction(dataPoints, ftsVal, A2val, Uval, Pval, rsVal, uval)
 
-  
+
   rm(al.cl)
   rm(Uval)
   rm(uval)
@@ -550,47 +553,46 @@ runMCS <- function(dataVal, intervalos, fcmMethod, orderVal, terms, reps) {
 
 
 runRWindows <- function(data,interv,method,ord,term,mcsReps, windowSize){
-  
+
   forePlus1 <- NULL
-  
+
   timeSecStart <- 0
   timeSecEnd <- 0
   timeLastInt <- 0
-  
+
   for (i in windowSize:(length(data)-1)){
     intsToTheEnd <- length(data) - windowSize - i
     timeToTheEnd <- as.numeric(intsToTheEnd) * timeLastInt
     timeLastInt <- round(timeSecEnd-timeSecStart, 2)
-    
-    
+
+
     print(paste(Sys.time(),"Iteration:",paste0(i,"/",(length(data)-1)),"| Time Last Int:",timeLastInt, timeToTheEnd,"to completion"))
-    
+
     timeSecStart <- Sys.time()
     initial <- i-windowSize+1
     final <- i-1
-    
+
     dataWindowed <- data[initial:final]
-    
+
     forecasting <- runMCS(dataWindowed, interv, method, ord, term, mcsReps)
     forecasting.median <- apply(forecasting, 1, median)
     forePlus1 <- c(forePlus1, as.numeric(tail(forecasting.median, 1)))
-    
+
     timeSecEnd <- Sys.time()
-    
+
   }
-  
+
   return(forePlus1)
 }
 
 
 
 getRWMSE <- function(data, predicted, winSize) {
-  
-  
+
+
   predData <- tail(data, (length(data)-winSize))
-  
+
   retMSE <- MSE(predData, predicted)
-  
+
   return(retMSE)
 }
-

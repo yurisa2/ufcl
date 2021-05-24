@@ -40,7 +40,7 @@ $toCsv = $result[0];
 
 // var_dump($toCsv);
 
-echo $toCsv['intervals'],',',$toCsv['order'],',',$toCsv['terms'],',',$toCsv['method'];
+echo $id,',',$toCsv['intervals'],',',$toCsv['order'],',',$toCsv['method'];
 
 
 
