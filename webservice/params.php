@@ -7,7 +7,7 @@ $PDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 if(empty($_GET['id'])) {
   $id = NULL;
-  $stmt =   "SELECT * FROM params where status IS NULL limit 1";
+  $stmt =   "SELECT * FROM params where status IS NULL ORDER BY RANDOM() limit 1";
   $query = $PDO->query($stmt);
   $result = $query->fetchall();
   $id = $result[0]['id'];

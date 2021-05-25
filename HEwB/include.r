@@ -141,8 +141,8 @@ clusteringInitial <- function (dataVal, intervals, centers, method = "ufcl") {
 
 lingTermsA2 <- function(terms, intervals) {
 
-  print(terms)
-  print(intervals)
+  # print(terms)
+  # print(intervals)
 
   A2Value <- matrix(0, nrow=terms, ncol=intervals)
   for(i in 1:terms){

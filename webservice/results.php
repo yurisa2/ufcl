@@ -6,22 +6,20 @@ $PDO = new PDO('sqlite:db/db.sqlite');
 $PDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $id = $_GET['id'];
-$mse = $_GET['mse'];
+$mse = $_POST['mse'];
 
 $result = $_POST['result'];
 
+// file_put_contents($id."rest1.txt", json_encode($_POST));
 
-$stmt =   "UPDATE results set status = $status where id = $id";
+$stmt =   "INSERT INTO results (paramId, mse, data) values ('$id','$mse','$result')";
 $query = $PDO->query($stmt);
 
-$stmt2 =   "UPDATE results set status = $status where id = $id";
+$stmt2 =   "UPDATE params set status = 'FINISHED' where id = $id";
 $query = $PDO->query($stmt2);
 
-$stmt3 =   "UPDATE results set mse = $mse where id = $id";
-$query = $PDO->query($stmt3);
+// file_put_contents($id."query.txt", json_encode($query));
 
-$stmt4 =   "UPDATE results set data = $result where id = $id";
-$query = $PDO->query($stmt4);
 
 // echo $stmt; exit;
 
