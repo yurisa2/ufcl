@@ -29,5 +29,5 @@ windowSize <- 111
 forePlus1off <- runRWindows(data,intervalos,"ufcl",ORDER,termos,30, windowSize)
 getRWMSE(data, forePlus1off, windowSize)
 
-
+write.csv(forePlus1off, "foreplus1.csv")
 

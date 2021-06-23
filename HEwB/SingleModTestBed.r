@@ -5,7 +5,7 @@ library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/Documents/UFCL"
+PATH <- "C:/inetpub/wwwroot/ufcl"
 
 #ORDEM n+1 para calcularmos até ordem n
 ORDEM <- 9    #High-order FTS. Maximum of 9th order
@@ -56,4 +56,3 @@ frg <- fuzzyRelGroups(ORDEM, prec)
 
 P <- idCertainTransitions(supPrec, frg)
 
-P[[length(P)]] <- head(P[[length(P)]],-1)

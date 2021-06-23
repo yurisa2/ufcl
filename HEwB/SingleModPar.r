@@ -3,7 +3,7 @@ library(httr)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/lampstack-7.3.7-1/apache2/htdocs/UFCL/"
+PATH <- "C:/inetpub/wwwroot/ufcl"
 
 
 setwd(PATH)
@@ -13,7 +13,7 @@ dados <- read.csv("data/contral.csv", header=TRUE)
 data <- tail(dados$appl, 110)
 windowSize <- 106
 
-baseUrl <- "http://localhost:8080/UFCL/webservice"
+baseUrl <- "http://sa2.com.br/ufcl/webservice"
 
 # data <- dados$appl
 
@@ -41,7 +41,7 @@ while (gotData == TRUE)  {
     htcontent <- content(params, "text")
     params <- strsplit(htcontent, ",")[[1]]
 
-    # print(params)
+    print(params)
 
     # print(counter, Sys.time())
     # print(counter)
