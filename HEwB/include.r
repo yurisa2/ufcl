@@ -596,3 +596,74 @@ getRWMSE <- function(data, predicted, winSize) {
 
   return(retMSE)
 }
+
+
+
+getLastLine <- function(certainTransitionList) {
+  lastLine <- tail(certainTransitionList, 1)
+  lastLine <- lastLine[[1]]
+  lastLine <- head(lastLine, length(lastLine)-1)
+  lastLine <
+
+  return(lastLine)
+}
+
+
+getListMatch <- function(line, list) {
+  ## Here is possible to add a second layer of recursion
+
+  for (i in (length(list)-1):1) {
+    var <- list[i]
+    var <- head(var[[1]], length(var[[1]])-1)
+    var <- list(var)
+    ret <- FALSE
+    if(identical(var, list(line))) {
+      ret <- i
+      break
+    }
+  }
+  return(ret)
+}
+
+searchFullLineList <- function(line, fulllist) {
+  found <- FALSE
+  len <- length(line)
+  while(len > 1 || found == FALSE) {
+    varline <- tail(line, len)
+    # print(tail(line, len))
+    found <-getListMatch(varline, fulllist)
+    len <- len - 1
+  }
+  return(found)
+}
+
+getNextGroup <- function(element, ctlist) {
+  lastelem <- FALSE
+  lastelem <- tail(ctlist[[element]], 1)
+
+  return(lastelem)
+}
+
+changeLastLine <- function(ctlist, nextgroup){
+
+  lastLine <- tail(ctlist, 1)
+  lastLine <- lastLine[[1]]
+  lastLine[length(lastLine)] <- nextgroup
+  # lastLine[length(lastLine)+1] <- NA    # NA Proved unused
+  lastLine <- list(lastLine)
+  ctlist[length(ctlist)] <- lastLine
+
+  return(ctlist)
+}
+
+fixCertainTransitions <- function(ctlist) {
+  deflist <- ctlist
+
+  lline <- getLastLine(Pval)
+  element <- searchFullLineList(lline, Pval)
+  if(element != FALSE) {
+    nxgroup <- getNextGroup(element, Pval)
+    deflist <- changeLastLine(Pval, nxgroup)
+  }
+  return(deflist)
+}
