@@ -5,7 +5,7 @@ library(e1071)
 
 set.seed(1)
 
-PATH <- "/home/yurisa2/lampstack-8.0.3-0/apache2/htdocs/ufcl"
+PATH <- "/home/yurisa2/lampstack-7.3.7-1/apache2/htdocs/UFCL"
 
 #ORDEM n+1 para calcularmos até ordem n
 ORDEM <- 9    #High-order FTS. Maximum of 9th order
@@ -25,7 +25,7 @@ source("HEwB/include.r")
 dados <- read.csv("data/contral.csv", header=TRUE)
 dataPoints <- dados$appl
 
-dataPoints <- tail(dataPoints, 70)
+dataPoints <- head(dataPoints, 50)
 
 ### 20210125 - Inicialização única para todas as rodadas
 # centers <- c(0, sample(min(dataPoints[dataPoints!=0]):max(dataPoints),k0-1))
@@ -49,6 +49,19 @@ supPrec <- calcPrec(ftsVal, ORDEM)
 precVal <- defPrec(supPrec, ORDEM)
 frgVal <- fuzzyRelGroups(ORDEM, precVal)
 Pval <- idCertainTransitions(supPrec, frgVal)
-Pval <- fixCertainTransitions(Pval)
+
+# Pval <- fixCertainTransitions(Pval)
 rsVal <- defuzRle1(Pval)
 yhatVal <- prediction(dataPoints, ftsVal, A2val, Uval, Pval, rsVal, uval)
+
+line <- getLastLine(Pval)
+
+
+
+# NEEDS TO FIND INSIDE LINE NOW
+
+source("HEwB/include.r")
+
+searchline <- c(1, 6, 1)
+
+getListMatch(searchline, Pval)

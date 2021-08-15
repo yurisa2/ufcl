@@ -492,6 +492,9 @@ runModel <- function(dataPoints, k0, centers, fcmMethod, ORDEM, LINGUISTIC.TERMS
   precVal <- defPrec(supPrec, ORDEM)
   frgVal <- fuzzyRelGroups(ORDEM, precVal)
   Pval <- idCertainTransitions(supPrec, frgVal)
+  # the whole work is here
+  Pval <- fixCertainTransitions(Pval)
+
   rsVal <- defuzRle1(Pval)
   yhatVal <- prediction(dataPoints, ftsVal, A2val, Uval, Pval, rsVal, uval)
 
@@ -608,18 +611,68 @@ getLastLine <- function(certainTransitionList) {
   return(lastLine)
 }
 
-
-getListMatch <- function(line, list) {
-  ## Here is possible to add a second layer of recursion
-
-  for (i in (length(list)-1):1) {
-    var <- list[i]
-    var <- head(var[[1]], length(var[[1]])-1)
+checkIdentical <- function(var, line){
+  if(is.list(var) != TRUE) {
     var <- list(var)
-    ret <- FALSE
-    if(identical(var, list(line))) {
-      ret <- i
+  }
+  if(is.list(line) != TRUE) {
+    line <- list(line)
+  }
+  return(identical(var, line))
+  }
+
+
+
+getListMatch <- function(line, ctlist) {
+  ## Here is possible to add a second layer of recursion
+  ret <- FALSE
+
+  for (i in (length(ctlist)-1):1) {
+    if(ret != FALSE) {
       break
+    }
+    var <- ctlist[i]
+    var <- head(var[[1]], length(var[[1]])-1)
+    if((length(var) + 1) <= length(line)){
+      # print(paste('equal or less', i))
+      next
+    } else {
+      if(checkIdentical(var, list(line))) {
+        # print('found it on the main')
+        value <- getNextGroup(i, ctlist)
+        # print(value)
+        ret <- value
+        break
+      }
+      iterable <- length(var) - length(line)
+      origvar <- var
+      if(iterable > 0) {
+
+        for (j in 1:iterable){
+          target <- j+length(line)-1
+
+          var <- origvar[j:target]
+
+          # print('i')
+          # print(i)
+          # print('j')
+          # print(j)
+          # print('target')
+          # print(target)
+          # print('var')
+          # print(var)
+          # print('line')
+          # print(line)
+          # print(checkIdentical(var, line))
+
+          if(checkIdentical(var, line)) {
+            # print('found it on the secondary')
+            # print(origvar[target+1])
+            ret <- origvar[target+1]
+            break
+          }
+        }
+      }
     }
   }
   return(ret)
@@ -630,7 +683,7 @@ searchFullLineList <- function(line, fulllist) {
   len <- length(line)
   while(len > 1 || found == FALSE) {
     varline <- tail(line, len)
-    # print(tail(line, len))
+    print(varline)
     found <-getListMatch(varline, fulllist)
     len <- len - 1
   }
@@ -658,12 +711,14 @@ changeLastLine <- function(ctlist, nextgroup){
 
 fixCertainTransitions <- function(ctlist) {
   deflist <- ctlist
-
   lline <- getLastLine(Pval)
-  element <- searchFullLineList(lline, Pval)
-  if(element != FALSE) {
-    nxgroup <- getNextGroup(element, Pval)
-    deflist <- changeLastLine(Pval, nxgroup)
+  if(length(lline) > 3) {
+
+    element <- searchFullLineList(lline, Pval)
+    if(element != FALSE) {
+      nxgroup <- element
+      deflist <- changeLastLine(Pval, nxgroup)
+    }
   }
   return(deflist)
 }
