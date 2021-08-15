@@ -683,7 +683,7 @@ searchFullLineList <- function(line, fulllist) {
   len <- length(line)
   while(len > 1 || found == FALSE) {
     varline <- tail(line, len)
-    print(varline)
+    # print(varline)
     found <-getListMatch(varline, fulllist)
     len <- len - 1
   }
@@ -711,14 +711,19 @@ changeLastLine <- function(ctlist, nextgroup){
 
 fixCertainTransitions <- function(ctlist) {
   deflist <- ctlist
-  lline <- getLastLine(Pval)
+  lline <- getLastLine(ctlist)
   if(length(lline) > 3) {
 
-    element <- searchFullLineList(lline, Pval)
+    element <- searchFullLineList(lline, ctlist)
     if(element != FALSE) {
       nxgroup <- element
-      deflist <- changeLastLine(Pval, nxgroup)
+      deflist <- changeLastLine(ctlist, nxgroup)
+    } else {
+      print('couldnt fix, not found' )
+
     }
   }
+
+
   return(deflist)
 }
