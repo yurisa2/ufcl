@@ -24,10 +24,21 @@ data <- dados$appl
 
 # data <- head(data, 80)
 
-windowSize <- 111
+fixll <- TRUE
+segsearch <- TRUE
 
-forePlus1off <- runRWindows(data,intervalos,"ufcl",ORDER,termos,30, windowSize)
+windowSize <- 180
+
+forePlus1off <- runRWindows(data,
+                            intervalos,
+                            "ufcl",
+                            ORDER,
+                            termos,
+                            30,
+                            windowSize,
+                            fixll,
+                            segsearch
+                          )
 getRWMSE(data, forePlus1off, windowSize)
 
 write.csv(forePlus1off, "foreplus1.csv")
-

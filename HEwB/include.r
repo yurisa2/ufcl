@@ -364,7 +364,13 @@ defuzRle1 <- function(PValue) {
   return(rsValue)
 }
 
-prediction <- function(dataVal, ftsValue, A2Value, UValue, PValue, rsValue, uValue) {
+prediction <- function(dataVal,
+                       ftsValue,
+                       A2Value,
+                       UValue,
+                       PValue,
+                       rsValue,
+                       uValue) {
 
     FIRST.ITEM <- 2
     LAST.ITEM <- length(dataVal)+2
@@ -480,7 +486,15 @@ prediction <- function(dataVal, ftsValue, A2Value, UValue, PValue, rsValue, uVal
     return(yhatValue)
 }
 
-runModel <- function(dataPoints, k0, centers, fcmMethod, ORDEM, LINGUISTIC.TERMS) {
+runModel <- function(dataPoints,
+                     k0,
+                     centers,
+                     fcmMethod,
+                     ORDEM,
+                     LINGUISTIC.TERMS,
+                     fixll=TRUE,
+                     segsearch=FALSE
+                   ) {
 
 
   al.cl <- clusteringInitial(dataPoints, k0, centers, fcmMethod)
@@ -493,7 +507,9 @@ runModel <- function(dataPoints, k0, centers, fcmMethod, ORDEM, LINGUISTIC.TERMS
   frgVal <- fuzzyRelGroups(ORDEM, precVal)
   Pval <- idCertainTransitions(supPrec, frgVal)
   # the whole work is here
-  Pval <- fixCertainTransitions(Pval)
+  if(fixll == TRUE) {
+    Pval <- fixCertainTransitions(Pval, segsearch)
+  }
 
   rsVal <- defuzRle1(Pval)
   yhatVal <- prediction(dataPoints, ftsVal, A2val, Uval, Pval, rsVal, uval)
@@ -533,9 +549,14 @@ errorMSE <- MSE(resulting$original, resulting$predicted)
 return(errorMSE)
 }
 
-
-
-runMCS <- function(dataVal, intervalos, fcmMethod, orderVal, terms, reps) {
+runMCS <- function(dataVal,
+                   intervalos,
+                   fcmMethod,
+                   orderVal,
+                   terms,
+                   reps,
+                   fixll,
+                   segsearch=FALSE) {
 
   forecasting <- NULL
 
@@ -544,7 +565,15 @@ runMCS <- function(dataVal, intervalos, fcmMethod, orderVal, terms, reps) {
   centersVal <- c(0, sample(min(dataVal[dataVal!=0]):max(dataVal),intervalos-1))
   centersVal <- as.matrix(centersVal)
 
-  yhat <- runModel(dataVal, intervalos, centersVal, fcmMethod, orderVal, terms)
+  yhat <- runModel(dataVal,
+                   intervalos,
+                   centersVal,
+                   fcmMethod,
+                   orderVal,
+                   terms,
+                   fixll,
+                   segsearch
+                 )
 
   forecasting <- cbind(forecasting, yhat)
 
@@ -555,7 +584,15 @@ runMCS <- function(dataVal, intervalos, fcmMethod, orderVal, terms, reps) {
 
 
 
-runRWindows <- function(data,interv,method,ord,term,mcsReps, windowSize){
+runRWindows <- function(data,
+                        interv,
+                        method,
+                        ord,
+                        term,
+                        mcsReps,
+                        windowSize,
+                        fixll,
+                        segsearch){
 
   forePlus1 <- NULL
 
@@ -577,7 +614,7 @@ runRWindows <- function(data,interv,method,ord,term,mcsReps, windowSize){
 
     dataWindowed <- data[initial:final]
 
-    forecasting <- runMCS(dataWindowed, interv, method, ord, term, mcsReps)
+    forecasting <- runMCS(dataWindowed, interv, method, ord, term, mcsReps, fixll, segsearch)
     forecasting.median <- apply(forecasting, 1, median)
     forePlus1 <- c(forePlus1, as.numeric(tail(forecasting.median, 1)))
 
@@ -623,7 +660,7 @@ checkIdentical <- function(var, line){
 
 
 
-getListMatch <- function(line, ctlist) {
+getListMatch <- function(line, ctlist, segsearch=TRUE) {
   ## Here is possible to add a second layer of recursion
   ret <- FALSE
 
@@ -646,7 +683,7 @@ getListMatch <- function(line, ctlist) {
       }
       iterable <- length(var) - length(line)
       origvar <- var
-      if(iterable > 0) {
+      if(iterable > 0 && segsearch == TRUE) {
 
         for (j in 1:iterable){
           target <- j+length(line)-1
@@ -678,13 +715,13 @@ getListMatch <- function(line, ctlist) {
   return(ret)
 }
 
-searchFullLineList <- function(line, fulllist) {
+searchFullLineList <- function(line, fulllist, segsearch) {
   found <- FALSE
   len <- length(line)
   while(len > 1 || found == FALSE) {
     varline <- tail(line, len)
     # print(varline)
-    found <-getListMatch(varline, fulllist)
+    found <-getListMatch(varline, fulllist, segsearch)
     len <- len - 1
   }
   return(found)
@@ -709,12 +746,12 @@ changeLastLine <- function(ctlist, nextgroup){
   return(ctlist)
 }
 
-fixCertainTransitions <- function(ctlist) {
+fixCertainTransitions <- function(ctlist, segsearch) {
   deflist <- ctlist
   lline <- getLastLine(ctlist)
   if(length(lline) > 3) {
 
-    element <- searchFullLineList(lline, ctlist)
+    element <- searchFullLineList(lline, ctlist, segsearch)
     if(element != FALSE) {
       nxgroup <- element
       deflist <- changeLastLine(ctlist, nxgroup)
