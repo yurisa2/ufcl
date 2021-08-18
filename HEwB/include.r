@@ -256,7 +256,7 @@ idCertainTransitions <- function(precVal, frgValue) {
       # aux <- get(paste("prec",n,sep=""))
       aux <- data.frame(precVal[paste("prec",n,sep="")])
 
-      if(is.na(f[length(f)])){
+      if(length(f) >0 && is.na(f[length(f)])){
 
         # print("BREAKPONT CAIU NO IF")
 

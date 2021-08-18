@@ -11,10 +11,12 @@ dados <- tail(dados, 112)
 
 dataPredicted <- read.csv("foreplus1.csv")
 
-MSE( dd$dataPredicted.x,dd$dados.appl)
 
 
 dd <- data.frame(dados$appl, dataPredicted$x)
 dd[,1]
 plot(dados$year,dd[,1],type="l",col="red")
 lines(dados$year,dd[,2],col="green")
+
+
+MSE( dd$dataPredicted.x,dd$dados.appl)
