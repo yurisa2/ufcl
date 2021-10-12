@@ -470,9 +470,9 @@ prediction <- function(dataVal,
 
 
     rm(S.index)
-    rm(weight)
+    #rm(weight)
     rm(values)
-    rm(m)
+    #rm(m)
     rm(index)
     rm(x)
     rm(S)
@@ -480,7 +480,7 @@ prediction <- function(dataVal,
     rm(Pindex)
     rm(ok)
     rm(ftsValue2)
-    rm(j)
+    #rm(j)
 
 
     return(yhatValue)
@@ -592,10 +592,20 @@ runRWindows <- function(data,
                         mcsReps,
                         windowSize,
                         fixll,
-                        segsearch){
+                        segsearch,
+                        file_name='noname'
+                        ){
 
   forePlus1 <- NULL
 
+  startName <- Sys.time()
+  
+  filenamestring <- paste0(file_name,'_',startName,"_foreplus1.csv")
+  filenamestring <- gsub(" ", "_", filenamestring, fixed = TRUE)
+  filenamestring <- gsub(":", "_", filenamestring, fixed = TRUE)
+  
+  print(filenamestring)
+  
   timeSecStart <- 0
   timeSecEnd <- 0
   timeLastInt <- 0
@@ -618,6 +628,8 @@ runRWindows <- function(data,
     forecasting.median <- apply(forecasting, 1, median)
     forePlus1 <- c(forePlus1, as.numeric(tail(forecasting.median, 1)))
 
+    write.csv(forePlus1, filenamestring)
+    
     timeSecEnd <- Sys.time()
 
   }
@@ -749,7 +761,8 @@ changeLastLine <- function(ctlist, nextgroup){
 fixCertainTransitions <- function(ctlist, segsearch) {
   deflist <- ctlist
   lline <- getLastLine(ctlist)
-  if(length(lline) > 3) {
+  # print(lline)
+  if(length(lline) >= 3) {
 
     element <- searchFullLineList(lline, ctlist, segsearch)
     if(element != FALSE) {

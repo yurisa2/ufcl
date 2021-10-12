@@ -3,7 +3,7 @@ rm(list=ls())
 
 set.seed(1)
 
-PATH <- "C:/inetpub/wwwroot/ufcl"
+PATH <- "C:/ufcl"
 
 #ORDEM n+1 para calcularmos até ordem n
 ORDER <- 15    #High-order FTS. Maximum of 9th order
@@ -34,10 +34,11 @@ forePlus1off <- runRWindows(data,
                             "ufcl",
                             ORDER,
                             termos,
-                            30,
+                            3,
                             windowSize,
                             fixll,
-                            segsearch
+                            segsearch,
+                            'ss_fixll_180'
                           )
 getRWMSE(data, forePlus1off, windowSize)
 
