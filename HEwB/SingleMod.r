@@ -3,7 +3,7 @@ rm(list=ls())
 
 set.seed(1)
 
-PATH <- "C:/ufcl"
+PATH <- "/home/yurisa2/lampstack-7.3.7-1/apache2/htdocs/UFCL"
 
 #ORDEM n+1 para calcularmos até ordem n
 ORDER <- 15    #High-order FTS. Maximum of 9th order
@@ -27,7 +27,7 @@ data <- dados$appl
 fixll <- TRUE
 segsearch <- TRUE
 
-windowSize <- 180
+windowSize <- 220
 
 forePlus1off <- runRWindows(data,
                             intervalos,
