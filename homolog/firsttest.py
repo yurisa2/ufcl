@@ -4,6 +4,7 @@ from pyFTS.partitioners import Simple, CMeans, FCM
 from pyFTS.common import Membership as mf
 from pyFTS.models import chen
 from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
 
 
 import warnings
@@ -15,10 +16,10 @@ df
 
 data = df['appl'].values
 
-len((data))/3
+len((data))*.8
 
-x_train = data[:111]
-x_test = data[112:]
+x_train = data[:177]
+x_test = data[178:]
 
 # fig, ax = plt.subplots(nrows=2, ncols=1, figsize=[15, 10])
 #
@@ -56,10 +57,10 @@ def generate_sets(center_list, data, partitioner):
 
 
 results = []
-for value in range(0, 500):
+for _ in range(0, 20):
 
-    # cmeanspartitions = CMeans.CMeansPartitioner(data=data, npart=7)
-    cmeanspartitions = FCM.FCMPartitioner(data=data, npart=7)
+    cmeanspartitions = CMeans.CMeansPartitioner(data=data, npart=20)
+    # cmeanspartitions = FCM.FCMPartitioner(data=data, npart=7)
 
     initial_clustering = []
     for set in cmeanspartitions.sets:
@@ -91,8 +92,20 @@ for value in range(0, 500):
     y_pred1 = forecasts1
     error_mse1 = 0
 
+    forecasts0 = model1.predict(x_train)
+
     error_mse1 = mean_squared_error(y_true1, y_pred1)
     results.append(error_mse1)
     # print('mse: ' + str(round(error_mse1)))
 
 min(results)
+
+
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=[15, 10])
+plt.plot(x_test, color='r', label='sin')  # r - red colour
+plt.plot(forecasts1, color='g', label='cos')  # g - green colour
+
+
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=[15, 10])
+plt.plot(x_train, color='r', label='sin')  # r - red colour
+plt.plot(forecasts0, color='g', label='cos')  # g - green colour

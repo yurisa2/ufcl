@@ -16,11 +16,11 @@ else:
     from io import StringIO
 
 import pandas as pd
-from pyFTS.partitioners import Custom, FCM, CMeans
-from pyFTS.common import Membership as mf
-from pyFTS.common import FLR
-from pyFTS.models import chen, cheng, ismailefendi, sadaei, hofts, hwang
-from pyFTS.common import Util
+from pyFTS2.partitioners import Custom, FCM, CMeans
+from pyFTS2.common import Membership as mf
+from pyFTS2.common import FLR
+from pyFTS2.models import chen, cheng, ismailefendi, sadaei, hofts, hwang
+from pyFTS2.common import Util
 from sklearn.metrics import mean_squared_error
 
 import itertools
