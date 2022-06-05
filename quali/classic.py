@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.metrics import mean_squared_error
 
 
-data = pd.read_csv('quali/contral.csv')
+data = pd.read_csv('contral.csv')
 
 zero_perc = (len(data[data.appl == 0]) / len(data.appl)) * 100
 
@@ -48,4 +48,4 @@ plt.legend()
 arma_rmse = np.sqrt(mean_squared_error(
     Y_test.values, y_pred_df["Predictions"]))
 print("RMSE: ", arma_rmse)
-print("RMSE: ", arma_rmse)
+print("MSE: ", arma_rmse ** 2)
