@@ -1,5 +1,5 @@
 from pyFTS.partitioners import CMeans, Grid, FCM, Entropy
-from pyFTS.models import chen, cheng, sadaei
+from pyFTS.models import song, cheng, sadaei
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 from math import sqrt
@@ -37,8 +37,8 @@ def run_model(model_name, partitioner_name, parts, train, test):
     if(partitioner_name == 'entropy'):
         partitioner = Entropy.EntropyPartitioner(data=Y_train, npart=parts)
 
-    if(model_name == 'chen'):
-        model = chen.ConventionalFTS(partitioner=partitioner)
+    if(model_name == 'song'):
+        model = song.ConventionalFTS(partitioner=partitioner)
     elif(model_name == 'cheng'):
         model = cheng.TrendWeightedFTS(partitioner=partitioner)
     elif(model_name == 'sadaei'):
@@ -61,7 +61,7 @@ def run_model(model_name, partitioner_name, parts, train, test):
     return temp_dict
 
 
-models = ['chen', 'cheng', 'sadaei']
+models = ['song', 'cheng', 'sadaei']
 partitioners = ['grid', 'cmeans', 'fcm', 'entropy']
 df = pd.DataFrame()
 
@@ -82,7 +82,7 @@ for model in models:
             except Exception as e:
                 print(e, counter, model, partitioner, parts)
 
-
-with open('full_dataset.pickle', 'wb') as f:
-    # Pickle the 'data' dictionary using the highest protocol available.
-    pickle.dump(df, f, pickle.HIGHEST_PROTOCOL)
+#
+# with open('full_dataset.pickle', 'wb') as f:
+#     # Pickle the 'data' dictionary using the highest protocol available.
+#     pickle.dump(df, f, pickle.HIGHEST_PROTOCOL)

@@ -3,6 +3,25 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+
+def specific_plots(model_name):
+
+    select_data = data.loc[data['model'] == model_name]
+
+    select_data.boxplot(by='partitioner', column=['rmse'], figsize=(16, 4))
+    plt.savefig('plots/'+model_name+'_pyfts_analysis_boxplot_rmse.png')
+    plt.show()
+
+    select_data.hist(column='rmse', figsize=(16, 4))
+    plt.savefig('plots/'+model_name+'_pyfts_analysis_hist_rmse.png')
+    plt.show()
+
+    select_data.pivot(index='parts', columns='partitioner',
+                      values='rmse').plot(figsize=(16, 4))
+    plt.savefig('plots/'+model_name+'_pyfts_analysis_pivot_partitioner.png')
+    plt.show()
+
+
 ratio = 80
 data = pd.read_csv('contral.csv')
 split_fac = round(len(data.appl) * (ratio/100))
@@ -18,33 +37,29 @@ with open('full_dataset.pickle', 'rb') as f:
     # have to specify it.
     data = pickle.load(f)
 
-
+# Just to check some vars
 data.sort_values(by='rmse', ascending=True)
 
-select_data = data.loc[data['model'] == 'sadaei']
-# select_data.set_index('parts', inplace=True)
-
-select_data.boxplot(by='partitioner', column=['rmse'])
-select_data.hist(column='rmse')
-#
-# select_data.groupby('partitioner').plot(
-#     None, 'rmse', subplots=True, legend=True)
-
-select_data.pivot(index='parts', columns='partitioner', values='rmse').plot()
-
+specific_plots('song')
+specific_plots('sadaei')
+specific_plots('cheng')
 
 winners = data.loc[data.groupby('model').rmse.idxmin()]  # Winners
 
-forecasts_chen = np.array(
-    winners[winners['model'] == 'chen']['forecasts']).tolist()[0]
+forecasts_song = np.array(
+    winners[winners['model'] == 'song']['forecasts']).tolist()[0]
+
 forecasts_sadaei = np.array(winners[winners['model'] == 'sadaei']['forecasts']).tolist()[
                                                                              0]
 forecasts_cheng = np.array(
     winners[winners['model'] == 'cheng']['forecasts']).tolist()[0]
 
+
+plt.figure(figsize=(16, 4))
 plt.plot(X_test, Y_test, label='True')
-plt.plot(X_test, forecasts_chen, label='Chen')
+plt.plot(X_test, forecasts_song, label='Song')
 plt.plot(X_test, forecasts_cheng, label='Cheng')
 plt.plot(X_test, forecasts_sadaei, label='Sadaei')
 plt.legend()
+plt.savefig('plots/full_results_pyfts_analysis_pivot_partitioner.png')
 plt.show()

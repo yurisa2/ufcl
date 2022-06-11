@@ -7,20 +7,17 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 import pandas as pd
 
-data = pd.read_csv('quali/contral.csv')
+data = pd.read_csv('contral.csv')
 
 zero_perc = (len(data[data.appl == 0]) / len(data.appl)) * 100
 
-
-ratio = 80
-split_fac = round(len(data.appl) * (ratio/100))
-
-X_train = data.year[:split_fac]
+X_train = data.appl
 
 
-part = pUtil.explore_partitioners(X_train[:split_fac], 100, methods=[Grid.GridPartitioner, CMeans.CMeansPartitioner,
-                                                                     FCM.FCMPartitioner, Entropy.EntropyPartitioner,
-                                                                     Huarng.HuarngPartitioner],
+part = pUtil.explore_partitioners(X_train, 10, methods=[Grid.GridPartitioner, CMeans.CMeansPartitioner,
+                                                        FCM.FCMPartitioner, Entropy.EntropyPartitioner],
                                   mf=[mf.trimf])
 
-plt.plot(part)
+type(part)
+
+plt.plot(part[1])
