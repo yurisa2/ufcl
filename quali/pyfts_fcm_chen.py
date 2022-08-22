@@ -7,7 +7,6 @@ from math import sqrt
 import pandas as pd
 
 data = pd.read_csv('quali/contral.csv')
-
 zero_perc = (len(data[data.appl == 0]) / len(data.appl)) * 100
 
 # plt.plot(data.appl)

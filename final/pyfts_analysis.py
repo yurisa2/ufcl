@@ -23,7 +23,7 @@ def specific_plots(model_name):
 
 
 ratio = 80
-data = pd.read_csv('final/alagoas.csv')
+data = pd.read_csv('final/acre.csv')
 split_fac = round(len(data.appl) * (ratio/100))
 
 X_train = data.year[:split_fac]
