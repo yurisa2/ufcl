@@ -1,3 +1,4 @@
+from sklearn.model_selection import GridSearchCV
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -10,28 +11,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# our dataset in this implementation is small and thus we can print it all instead of viewing only the end
-from sklearn.svm import SVR
-from sklearn.model_selection import GridSearchCV
-
-
 
 ratio = 80
 data = pd.read_csv('/Users/yurisa2/quantzed/ufcl/data/contral.csv')
+data['date'] = pd.to_datetime(data.year)
 data['year'] = data.index + 1
-
-
 
 
 split_fac = round(len(data.appl) * (ratio/100))
 
 
-X_train = np.array(data.appl[:split_fac]).reshape(-1, 1)[1:]
-Y_train = np.array(data.appl[:split_fac].shift(1)).reshape(-1, 1)[1:]
+X_train = np.array(data.appl[:split_fac]).reshape(-1, 1)[:-1]
+Y_train = np.array(data.appl[:split_fac].shift(-1)).reshape(-1, 1)[:-1]
 
 
-X_test = np.array(data.appl[split_fac:]).reshape(-1, 1)[1:]
-Y_test = np.array(data.appl[split_fac:].shift(1)).reshape(-1, 1)[1:]
+X_test = np.array(data.appl[split_fac:]).reshape(-1, 1)[:-1]
+Y_test = np.array(data.appl[split_fac:].shift(-1)).reshape(-1, 1)[:-1]
+
 
 #
 # svr_rbf = SVR(kernel='rbf', C=1e4, gamma=0.1)
@@ -42,36 +38,26 @@ Y_test = np.array(data.appl[split_fac:].shift(1)).reshape(-1, 1)[1:]
 # y_poly = svr_poly.fit(X_train, Y_train).predict(X_test)
 
 
-parameters = {'kernel': ('linear', 'rbf','poly'), 'C':[1, 1000],'epsilon':[0.1,0.2,0.5,0.3, 0.7, 0.9, 1]}
+parameters = {'kernel': ('linear', 'rbf', 'poly'), 'C': [
+                         0.01, 0.5, 1, 10, 50, 100], 'epsilon': [0.1, 1, 30]}
 svr = SVR()
 clf = GridSearchCV(svr, parameters, n_jobs=-1)
 
-results = clf.fit(X_train,Y_train)
+results = clf.fit(X_train, Y_train)
 best_par = clf.best_params_
 print(best_par)
 
 predictions = clf.predict(X_test)
 
 rmse = mean_squared_error(Y_test, predictions)
-
-#
-# # look at the results
-# import pylab as pl
-# pl.plot(range(len(Y_test)), Y_test, c='k', label='data')
-# pl.plot(range(len(Y_test)), predictions, c='b', label='Best Params')
-# pl.xlabel('data')
-# pl.ylabel('target')
-# pl.title('Support Vector Regression')
-# pl.legend()
-# pl.show()
-
-
+print(rmse)
 
 plt.figure(figsize=(16, 4))
-plt.plot(range(len(Y_train),len(Y_test) + len(Y_train)), Y_test, label='True')
-plt.plot(range(len(Y_train),len(Y_test) + len(Y_train)), predictions, label='SVR')
-plt.title('Support Vector Regression (Pallets)')
-
+plt.plot(data['year'][-44:], Y_test, label='True')
+plt.plot(data['year'][-44:],
+         predictions, label='SVR')
+plt.title('Support Vector Regression (Demanda diária de Pallets)')
+plt.xticks(data['year'][-44:], rotation=45)
 plt.legend()
-plt.savefig('final/plots/svr_results_pallets.png')
+plt.savefig('final/plots/svr_results_contral.png')
 plt.show()

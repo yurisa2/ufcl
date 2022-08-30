@@ -11,7 +11,7 @@ import pickle
 ratio = 80
 
 
-data = pd.read_csv('final/acre.csv')
+data = pd.read_csv('contral.csv')
 split_fac = round(len(data.appl) * (ratio/100))
 
 X_train = data.year[:split_fac]
@@ -71,7 +71,7 @@ counter = 0
 
 for model in models:
     for partitioner in partitioners:
-        for parts in range(10, 500, 5):
+        for parts in range(5, 500, 5):
             counter += 1
             print(counter, model, partitioner, parts)
             # threading.Thread(target=run_model, args=(
@@ -82,7 +82,7 @@ for model in models:
             except Exception as e:
                 print(e, counter, model, partitioner, parts)
 
-
-with open('final/full_dataset.pickle', 'wb') as f:
-    # Pickle the 'data' dictionary using the highest protocol available.
-    pickle.dump(df, f, pickle.HIGHEST_PROTOCOL)
+#
+# with open('full_dataset.pickle', 'wb') as f:
+#     # Pickle the 'data' dictionary using the highest protocol available.
+#     pickle.dump(df, f, pickle.HIGHEST_PROTOCOL)

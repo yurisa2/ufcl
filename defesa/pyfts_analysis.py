@@ -9,24 +9,21 @@ def specific_plots(model_name):
     select_data = data.loc[data['model'] == model_name]
 
     select_data.boxplot(by='partitioner', column=['rmse'], figsize=(16, 4))
-    plt.savefig('final/plots/'+model_name
-                + '_pyfts_analysis_boxplot_rmse_incendios.png')
+    plt.savefig('plots/'+model_name+'_pyfts_analysis_boxplot_rmse.png')
     plt.show()
 
     select_data.hist(column='rmse', figsize=(16, 4))
-    plt.savefig('final/plots/'+model_name
-                + '_pyfts_analysis_hist_rmse_incendios.png')
+    plt.savefig('plots/'+model_name+'_pyfts_analysis_hist_rmse.png')
     plt.show()
 
     select_data.pivot(index='parts', columns='partitioner',
                       values='rmse').plot(figsize=(16, 4))
-    plt.savefig('final/plots/'+model_name
-                + '_pyfts_analysis_pivot_partitioner_incendios.png')
+    plt.savefig('plots/'+model_name+'_pyfts_analysis_pivot_partitioner.png')
     plt.show()
 
 
 ratio = 80
-data = pd.read_csv('final/acre.csv')
+data = pd.read_csv('contral.csv')
 split_fac = round(len(data.appl) * (ratio/100))
 
 X_train = data.year[:split_fac]
@@ -35,7 +32,7 @@ Y_train = data.appl[:split_fac].to_list()
 X_test = data.year[split_fac:]
 Y_test = data.appl[split_fac:].to_list()
 
-with open('final/full_dataset.pickle', 'rb') as f:
+with open('full_dataset.pickle', 'rb') as f:
     # The protocol version used is detected automatically, so we do not
     # have to specify it.
     data = pickle.load(f)
@@ -63,9 +60,6 @@ plt.plot(X_test, Y_test, label='True')
 plt.plot(X_test, forecasts_song, label='Song')
 plt.plot(X_test, forecasts_cheng, label='Cheng')
 plt.plot(X_test, forecasts_sadaei, label='Sadaei')
-plt.title('')
-plt.xticks(rotation=45)
 plt.legend()
-plt.savefig(
-    'final/plots/full_results_pyfts_analysis_pivot_partitioner_incendios.png')
+plt.savefig('plots/full_results_pyfts_analysis_pivot_partitioner.png')
 plt.show()
