@@ -5,6 +5,9 @@ import numpy as np
 
 ratio = 80
 data = pd.read_csv('final/acre.csv')
+len(data)
+np.quantile(data.Incendios, [0,0.25,0.5,0.75,1])
+np.std(data.Incendios)
 split_fac = round(len(data.appl) * (ratio/100))
 
 X_train = data.year[:split_fac]
@@ -35,5 +38,6 @@ plt.plot(X_train, Y_train, label='Train')
 plt.plot(X_test, Y_test, label='Test')
 plt.legend()
 plt.xlabel('Datas')
+plt.xticks(range(0, len(data), 10), rotation=45)
 plt.ylabel('Incendios')
 plt.show()

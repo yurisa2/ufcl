@@ -13,19 +13,19 @@ for i in read_data.Estado.unique():
     temp_data = read_data[read_data['Estado'] == i]
     print(i, (len(temp_data[temp_data['Numero'] == 0]) / len(temp_data)) * 100)
 
-alagoas_data = read_data[read_data['Estado'] == 'Acre']
+acre_data = read_data[read_data['Estado'] == 'Acre']
 
-alagoas_data["Periodo"] = alagoas_data['Ano'].astype(str) +"-"+ alagoas_data["Mes"].astype(str) + '-01'
+acre_data["Periodo"] = acre_data['Ano'].astype(str) +"-"+ acre_data["Mes"].astype(str) + '-01'
 
-alagoas_data["Periodo"] = pd.to_datetime(alagoas_data["Periodo"])
-alagoas_data = alagoas_data.sort_values(by=['Periodo'])
-alagoas_data = alagoas_data.set_index(alagoas_data["Periodo"])
+acre_data["Periodo"] = pd.to_datetime(acre_data["Periodo"])
+acre_data = acre_data.sort_values(by=['Periodo'])
+acre_data = acre_data.set_index(acre_data["Periodo"])
 
 
 
-alagoas_data.Numero.plot()
+acre_data.Numero.plot()
 
 
 data = pd.DataFrame()
-data['year'] = alagoas_data['Periodo']
-data['appl'] = alagoas_data['Numero']
+data['year'] = acre_data['Periodo']
+data['appl'] = acre_data['Numero']
